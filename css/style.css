@@ -305,3 +305,45 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
 .site-footer .sep { margin:0 6px; color:#334455; }
 .site-footer a { color:#6090c0; text-decoration:none; }
 .site-footer a:hover { color:#80b0e0; text-decoration:underline; }
+
+/* MOBILE: tablet / phone */
+@media (max-width:768px) {
+  .header { height:60px; padding:0 12px 6px; }
+  .header svg { height:60px; }
+  .header-title h1 { font-size:16px; }
+  .header .deco { display:none; }
+
+  .top-row { flex-wrap:wrap; gap:10px; }
+  .top-row > div:first-child { width:100%; }
+  .verb-info { width:100%; }
+  .top-row-actions { flex-direction:row; margin-left:0; width:100%; gap:8px; }
+  .top-row-actions .btn-sm { flex:1; }
+
+  .content-row { display:flex; flex-direction:column-reverse; gap:12px; }
+
+  .conj-panel { column-count:1; }
+
+  .chart-grid { grid-template-columns:30px repeat(9,1fr); }
+  .kana-cell { font-size:14px; padding:4px 1px; }
+  .row-label { font-size:8px; }
+
+  .ref-card { padding:12px; }
+  .ref-card .ref-stem { font-size:22px; }
+
+  .verb-selector { max-height:250px; }
+  .vchip { min-width:60px; padding:4px 8px; }
+  .vchip .ck { font-size:15px; }
+}
+
+/* MOBILE: small phones */
+@media (max-width:480px) {
+  .tab { padding:6px 12px; font-size:12px; }
+
+  .tile-slot { width:56px; height:56px; font-size:28px; }
+  .tile-slots.compact .tile-slot { width:44px; height:44px; font-size:22px; }
+  .tile-slots.very-compact .tile-slot { width:36px; height:36px; font-size:18px; }
+
+  .filter-bar input[type="text"] { min-width:100%; order:-1; }
+
+  .cc { font-size:14px; padding:6px 4px; }
+}

@@ -5,7 +5,7 @@ Interactive web-based Japanese conjugation learning tool covering verbs, adjecti
 
 ## Structure
 - `index.html` - HTML structure with tab bar, tile slots, kana chart, conjugation panel, search/filter, verb selector
-- `css/style.css` - All styles (~310 lines). Dark theme, multi-column masonry conjugation layout, tab bar, compact tile system for long words
+- `css/style.css` - All styles (~350 lines). Dark theme, multi-column masonry conjugation layout, tab bar, compact tile system for long words, responsive media queries (768px/480px breakpoints)
 - `js/app.js` - All application logic (~1600 lines). Verb/adjective/noun database, conjugation engine, drill-down system, rendering, URL state
 
 ## Key Architecture

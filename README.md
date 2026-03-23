@@ -45,6 +45,7 @@ This project was heavily inspired by the Verb Lab tool created by George Tromble
 **Technical**
 - No dependencies, no build step -- just open index.html
 - Vanilla HTML, CSS, and JavaScript
+- Mobile-friendly responsive design (phone and tablet)
 - Compact tile system for long conjugated forms
 
 ## Word Types
