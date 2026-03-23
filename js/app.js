@@ -892,6 +892,30 @@ function renderTiles() {
   if(charCount > 10) el.classList.add('very-compact');
   else if(charCount > 7) el.classList.add('compact');
 
+  // When in て compound mode (no compound selected yet), show the て form as static tiles
+  if (teCompoundMode && !selConj) {
+    const baseEntry = drillStack[drillStack.length - 1];
+    const baseVerb = baseEntry?.verb;
+    if (baseVerb) {
+      const teForm = getFullConj(baseVerb, 'te');
+      if (teForm) {
+        const chars = [...teForm];
+        if (chars.length > 10) el.classList.add('very-compact');
+        else if (chars.length > 7) el.classList.add('compact');
+        for (let i = 0; i < Math.max(N, chars.length); i++) {
+          const d = document.createElement('div');
+          d.className = 'tile-slot';
+          if (i < chars.length) {
+            d.textContent = chars[i];
+            d.classList.add('stem-new');
+          }
+          el.appendChild(d);
+        }
+        return;
+      }
+    }
+  }
+
   // Handle て compound terminal phrase display
   if (selConj && teCompoundMode) {
     const compound = TE_COMPOUNDS.find(c => c.id === selConj);
