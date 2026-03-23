@@ -135,15 +135,20 @@
   .btn-type.on-godan { background:linear-gradient(180deg,#2a9d5c,#228a4c); color:#fff; border-color:#2a9d5c; }
   .btn-type.on-ichidan { background:linear-gradient(180deg,#d03030,#b82828); color:#fff; border-color:#d03030; }
 
-  /* CONJUGATION TABLE */
-  .conj-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; flex:1; overflow-y:auto; }
-  .conj-section { margin-bottom:4px; }
+  /* CONJUGATION TABLE - multi-column masonry layout */
+  .conj-panel {
+    background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px;
+    padding:10px; border:1px solid #2a3a50; flex:1; overflow-y:auto;
+    column-count:2; column-gap:8px;
+  }
+  .conj-section {
+    margin-bottom:6px;
+    break-inside:avoid; /* prevent sections from splitting across columns */
+  }
   .conj-section.hidden { display:none; }
   .conj-section-title { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#556677; padding:3px 4px 2px; }
-  .conj-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; }
-  .conj-grid.cols-5 { grid-template-columns:repeat(5,1fr); }
+  .conj-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:3px; }
   .conj-grid.cols-3 { grid-template-columns:repeat(3,1fr); }
-  .conj-grid.cols-2 { grid-template-columns:repeat(2,1fr); }
   .conj-grid.cols-1 { grid-template-columns:1fr; }
   .cc {
     padding:6px 4px; border-radius:5px;
@@ -1098,7 +1103,7 @@ function renderConj() {
     // Use grid with appropriate column count
     const grid = document.createElement('div');
     const n = sec.items.length;
-    grid.className = 'conj-grid' + (n<=1?' cols-1':n<=2?' cols-2':n<=3?' cols-3':n===5?' cols-5':'');
+    grid.className = 'conj-grid' + (n===1?' cols-1':n===3?' cols-3':'');
 
     sec.items.forEach(it=>{
       const c=document.createElement('div');
