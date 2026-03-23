@@ -84,11 +84,20 @@
   .verb-type-badge.ichidan { background:#d03030; color:#fff; }
   .verb-type-badge.irregular { background:#7044aa; color:#fff; }
 
-  /* CONTENT - auto/1fr split */
-  .content-row { display:grid; grid-template-columns:auto 1fr; gap:12px; }
+  /* CONTROLS ROW - above content */
+  .controls-row { display:flex; gap:6px; }
+  .btn { padding:7px 16px; border:none; border-radius:7px; font-family:'Nunito',sans-serif; font-weight:800; font-size:12px; cursor:pointer; transition:all 0.12s; }
+  .btn:active { transform:scale(0.96); }
+  .btn-get { background:linear-gradient(180deg,#30b060,#28a050); color:#fff; }
+  .btn-get:hover { background:linear-gradient(180deg,#28a050,#209040); }
+  .btn-clear { background:linear-gradient(180deg,#555,#444); color:#ccc; }
+  .btn-clear:hover { background:linear-gradient(180deg,#666,#555); color:#fff; }
+
+  /* CONTENT - wider kana table */
+  .content-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
   /* HIRAGANA */
-  .hiragana-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; width:380px; min-width:380px; }
+  .hiragana-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; }
   .chart-grid { display:grid; grid-template-columns:44px repeat(9,1fr); gap:2px; }
   .row-label {
     display:flex; align-items:center; justify-content:center;
@@ -119,21 +128,6 @@
 
   /* RIGHT PANEL */
   .right-panel { display:flex; flex-direction:column; gap:8px; }
-  .controls-row { display:flex; gap:6px; }
-  .btn { padding:7px 16px; border:none; border-radius:7px; font-family:'Nunito',sans-serif; font-weight:800; font-size:12px; cursor:pointer; transition:all 0.12s; }
-  .btn:active { transform:scale(0.96); }
-  .btn-get { background:linear-gradient(180deg,#30b060,#28a050); color:#fff; flex:1; }
-  .btn-get:hover { background:linear-gradient(180deg,#28a050,#209040); }
-  .btn-clear { background:linear-gradient(180deg,#d04040,#b83030); color:#fff; }
-  .btn-clear:hover { background:linear-gradient(180deg,#b83030,#a02828); }
-  .type-toggle { display:flex; gap:4px; }
-  .btn-type {
-    flex:1; padding:7px 6px; border:2px solid #334; border-radius:7px;
-    background:#1c2838; color:#556; font-family:'Nunito',sans-serif; font-weight:800; font-size:10px;
-    cursor:pointer; transition:all 0.15s; text-align:center;
-  }
-  .btn-type.on-godan { background:linear-gradient(180deg,#2a9d5c,#228a4c); color:#fff; border-color:#2a9d5c; }
-  .btn-type.on-ichidan { background:linear-gradient(180deg,#d03030,#b82828); color:#fff; border-color:#d03030; }
 
   /* CONJUGATION TABLE - multi-column masonry layout */
   .conj-panel {
@@ -284,17 +278,13 @@
       <div class="english-line" id="venglish"></div>
     </div>
   </div>
+  <div class="controls-row">
+    <button class="btn btn-get" onclick="getRandomVerb()">Random Verb</button>
+    <button class="btn btn-clear" onclick="clearAll()">Reset</button>
+  </div>
   <div class="content-row">
     <div class="hiragana-panel"><div class="chart-grid" id="chart"></div></div>
     <div class="right-panel">
-      <div class="controls-row">
-        <button class="btn btn-get" onclick="getRandomVerb()">Get Verb</button>
-        <button class="btn btn-clear" onclick="clearAll()">Clear</button>
-      </div>
-      <div class="type-toggle">
-        <button class="btn-type" id="tgG" onclick="filterType('godan')">REGULAR (godan)</button>
-        <button class="btn-type" id="tgI" onclick="filterType('ichidan')">IRU/ERU (ichidan)</button>
-      </div>
       <div id="drillBar"></div>
       <div class="conj-panel" id="conjP"></div>
     </div>
@@ -494,7 +484,6 @@ let cur=null;       // current verb {k, r, m, t}
 let selVowel=null;  // selected vowel row 'a','i','u','e','o' or null
 let selConj=null;   // selected conjugation id or null
 let ruRemoved=false; // for ichidan: has る been removed?
-let filt=null;
 
 // Drill-down stack
 let drillStack=[];
@@ -843,7 +832,6 @@ function render() {
   renderDrillBar();
   renderConj();
   renderBar();
-  renderTypeBtns();
   renderFilterBtns();
 }
 
@@ -1217,11 +1205,6 @@ function renderBar() {
   });
 }
 
-function renderTypeBtns() {
-  const g=document.getElementById('tgG'),i=document.getElementById('tgI');
-  g.className='btn-type'+(cur&&cur.t==='godan'?' on-godan':filt==='godan'?' on-godan':'');
-  i.className='btn-type'+(cur&&(cur.t==='ichidan'||cur.t==='irregular')?' on-ichidan':filt==='ichidan'?' on-ichidan':'');
-}
 
 function renderFilterBtns() {
   [5,4,3,2,1].forEach(n=>{
@@ -1266,11 +1249,6 @@ function getRandomVerb() {
   loadVerb(pool[Math.floor(Math.random()*pool.length)]);
 }
 function clearAll() { cur=null; selVowel=null; selConj=null; ruRemoved=false; drillStack=[]; render(); }
-function filterType(t) {
-  const pool = t==='ichidan' ? VERBS.filter(v=>v.t==='ichidan'||v.t==='irregular') : VERBS.filter(v=>v.t===t);
-  loadVerb(pool[Math.floor(Math.random()*pool.length)]);
-}
-
 // ===== INIT =====
 render();
 loadVerb(VERBS.find(v=>v.k==='\u884C\u304F'));
