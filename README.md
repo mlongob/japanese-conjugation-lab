@@ -12,27 +12,47 @@ This project was heavily inspired by the Verb Lab tool created by George Tromble
 
 ## Features
 
+**Navigation & Search**
 - Tab-based navigation: Verbs, Adjectives, and Nouns + Copula
-- Interactive hiragana chart showing the 5-step conjugation system for godan verbs
-- Click-to-remove ending interaction for ichidan verbs and い-adjectives
-- Full verb conjugation engine: polite, negative, potential, passive, causative, causative-passive, conditional, progressive, imperative, te/ta forms
-- Adjective conjugation: present, past, negative, te form, conditional, adverbial, attributive for both い and な types
-- Noun + copula conjugation: だ/です forms, negative, past, conditional
-- Irregular handling: いい (よ stem), する/来る compounds
-- Recursive drill-down into compound verb forms (potential, passive, causative produce new conjugatable verbs)
-- 180+ words tagged with JLPT levels (N5-N1)
-- Iru/eru godan exception verbs flagged for learners
 - Search by kanji, kana, romaji, or English meaning
-- JLPT level filtering
-- Shareable URL state (every interaction updates the URL)
+- JLPT level filtering (N5-N1) and godan exception filter
+- Shareable URL state -- every interaction updates the URL
+- 215+ words tagged with JLPT levels
+
+**Verb Conjugation**
+- Interactive hiragana chart showing the 5-step (godan) conjugation system
+- Click-to-remove る interaction for ichidan verbs
+- Polite, negative, potential, passive, causative, causative-passive forms
+- Conditional (ば / たら), progressive (ている), imperative, volitional
+- Obligation (なければならない), ability (ことができる), negative て (なくて)
+- Recursive drill-down: compound forms produce new conjugatable verbs
+- て form expansion: 12 compounds (てしまう, てみる, ておく, てある, てください, てもいい, etc.)
+- Irregular verb support: する, 来る, ある and their compounds (勉強する, etc.)
+- Iru/eru godan exception verbs flagged for learners
+
+**Adjective Conjugation**
+- い-adjectives: present, past, negative, て form, conditional, adverbial, attributive
+- な-adjectives: copula-based conjugation (だ/です, だった/でした, じゃない, etc.)
+- Drillable compounds: すぎる (too much), なる (become), する (make)
+- Appearance (そう), probability (だろう/でしょう)
+- Irregular いい handling (よ stem, よさそう)
+
+**Noun + Copula Conjugation**
+- Full copula conjugation: だ/です, だった/でした, じゃない/ではありません
+- て form (で), conditional (なら/だったら), attributive (の)
+- Probability (だろう/でしょう)
+
+**Technical**
 - No dependencies, no build step -- just open index.html
+- Vanilla HTML, CSS, and JavaScript
+- Compact tile system for long conjugated forms
 
 ## Word Types
 
 ### Verbs
 - **Godan (5-step):** The verb ending cycles through all five vowel rows of the hiragana chart depending on the conjugation form. These are the most common Japanese verbs.
 - **Ichidan (1-step):** The verb stem is formed by simply dropping the final る. All conjugation suffixes attach directly to the stem.
-- **Irregular:** する (to do) and 来る (to come) follow unique conjugation patterns. Compound する verbs (e.g. 勉強する) share the same irregular pattern.
+- **Irregular:** する (to do), 来る (to come), and ある (to exist) follow unique conjugation patterns. Compound する/来る verbs share the same patterns.
 
 ### Adjectives
 - **い-adjectives:** Drop the final い and add conjugation suffixes (かった, くない, くて, etc.). The irregular いい conjugates with a よ stem.
