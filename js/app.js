@@ -948,7 +948,8 @@ function renderTiles() {
             if(isDrillable && i===allChars.length-1 && (allChars[i]==='る' || selConj === 'te')) {
               d.classList.remove('conj-part');
               d.classList.add('ending');
-              d.title='Click to drill deeper into this conjugation';
+              d.classList.add('pulse');
+              d.title = selConj==='te' ? 'Click to expand て compounds' : 'Click to drill deeper into this conjugation';
               d.onclick=()=>drillInto(selConj);
             }
           }
@@ -1330,7 +1331,8 @@ function renderConj() {
       if(lit&&cur) {
         const suf=getDisplaySuffix(cur,it.id);
         let label = it.lb;
-        if(it.drillable) label += ' [click る to drill]';
+        if(it.drillable && it.id==='te') label += ' [click て to expand]';
+        else if(it.drillable) label += ' [click る to drill]';
         c.innerHTML=(suf||'\u2014')+`<span class="lb">${label}</span>`;
         c.onclick=()=>{
           selConj=selConj===it.id?null:it.id;
