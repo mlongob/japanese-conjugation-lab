@@ -84,14 +84,18 @@
   .verb-type-badge.ichidan { background:#d03030; color:#fff; }
   .verb-type-badge.irregular { background:#7044aa; color:#fff; }
 
-  /* CONTROLS ROW - above content */
-  .controls-row { display:flex; gap:6px; }
-  .btn { padding:7px 16px; border:none; border-radius:7px; font-family:'Nunito',sans-serif; font-weight:800; font-size:12px; cursor:pointer; transition:all 0.12s; }
-  .btn:active { transform:scale(0.96); }
-  .btn-get { background:linear-gradient(180deg,#30b060,#28a050); color:#fff; }
-  .btn-get:hover { background:linear-gradient(180deg,#28a050,#209040); }
-  .btn-clear { background:linear-gradient(180deg,#555,#444); color:#ccc; }
-  .btn-clear:hover { background:linear-gradient(180deg,#666,#555); color:#fff; }
+  /* CONTROLS - inline with verb info */
+  .verb-actions { display:flex; gap:5px; margin-top:6px; }
+  .btn-sm {
+    padding:4px 12px; border:none; border-radius:5px;
+    font-family:'Nunito',sans-serif; font-weight:700; font-size:10px;
+    cursor:pointer; transition:all 0.12s; text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .btn-sm:active { transform:scale(0.96); }
+  .btn-sm.shuffle { background:#2a5040; color:#6abf8a; border:1px solid #3a6858; }
+  .btn-sm.shuffle:hover { background:#3a6858; color:#8ad0a0; }
+  .btn-sm.clear { background:#3a2a2a; color:#c08080; border:1px solid #5a3a3a; }
+  .btn-sm.clear:hover { background:#4a3838; color:#e0a0a0; }
 
   /* CONTENT - wider kana table */
   .content-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -276,11 +280,11 @@
       <div class="meaning-line" id="vmeaning"></div>
       <div id="vtype"></div>
       <div class="english-line" id="venglish"></div>
+      <div class="verb-actions">
+        <button class="btn-sm shuffle" onclick="getRandomVerb()">Surprise me</button>
+        <button class="btn-sm clear" onclick="clearAll()">Clear</button>
+      </div>
     </div>
-  </div>
-  <div class="controls-row">
-    <button class="btn btn-get" onclick="getRandomVerb()">Random Verb</button>
-    <button class="btn btn-clear" onclick="clearAll()">Reset</button>
   </div>
   <div class="content-row">
     <div class="hiragana-panel"><div class="chart-grid" id="chart"></div></div>
@@ -959,7 +963,7 @@ function renderHint() {
 
 function renderInfo() {
   const kEl=document.getElementById('vkanji'),mEl=document.getElementById('vmeaning'),tEl=document.getElementById('vtype'),eEl=document.getElementById('venglish');
-  if(!cur){kEl.innerHTML='<span style="color:#556;font-size:13px">Click a verb or press "Get Verb"</span>';mEl.textContent='';tEl.innerHTML='';eEl.textContent='';return;}
+  if(!cur){kEl.innerHTML='<span style="color:#556;font-size:13px">Select a verb below or click "Surprise me"</span>';mEl.textContent='';tEl.innerHTML='';eEl.textContent='';return;}
 
   if(drillStack.length > 0) {
     const base = drillStack[0].verb;
