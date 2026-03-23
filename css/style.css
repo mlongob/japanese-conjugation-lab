@@ -308,6 +308,8 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
 
 /* MOBILE: tablet / phone */
 @media (max-width:768px) {
+  .app { overflow-x:hidden; }
+
   .header { height:60px; padding:0 12px 6px; }
   .header svg { height:60px; }
   .header-title h1 { font-size:16px; }
@@ -315,6 +317,7 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
 
   .top-row { flex-wrap:wrap; gap:10px; }
   .top-row > div:first-child { width:100%; }
+  .tile-slot { flex-shrink:1; min-width:0; }
   .verb-info { width:100%; }
   .top-row-actions { flex-direction:row; margin-left:0; width:100%; gap:8px; }
   .top-row-actions .btn-sm { flex:1; }
