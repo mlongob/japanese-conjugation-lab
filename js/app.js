@@ -581,6 +581,8 @@ function partsIrr(v, cid) {
     const m=map[cid];
     return { full:m.sk+m.sf, root:'', stemKana:m.sk, suffix:m.sf };
   } else if(v.r==='ある') {
+    // ある is irregular: negative is ない (not あらない)
+    // No potential, passive, causative, causative-passive, or imperative forms
     const base = {
       masu:{sk:'あり',sf:'ます'},mashita:{sk:'あり',sf:'ました'},
       masen:{sk:'あり',sf:'ません'},msndsh:{sk:'あり',sf:'ませんでした'},
@@ -589,10 +591,9 @@ function partsIrr(v, cid) {
       taknai:{sk:'あり',sf:'たくない'},taknkt:{sk:'あり',sf:'たくなかった'},
       nai:{sk:'',sf:'ない'},nakatta:{sk:'',sf:'なかった'},naide:{sk:'',sf:'ないで'},
       you:{sk:'あろ',sf:'う'},
-      koto:{sk:'ある',sf:'こと'},no:{sk:'ある',sf:'の'},na:{sk:'ある',sf:'な'},
+      koto:{sk:'ある',sf:'こと'},no:{sk:'ある',sf:'の'},
       te:{sk:'あっ',sf:'て'},ta:{sk:'あっ',sf:'た'},
       cond:{sk:'あれ',sf:'ば'},tara:{sk:'あっ',sf:'たら'},teiru:{sk:'あっ',sf:'ている'},
-      imperative:{sk:'あ',sf:'れ'},
     };
     if(!base[cid]) return null;
     const m=base[cid];
@@ -1116,10 +1117,12 @@ function renderConj() {
 
   sections.forEach(sec=>{
     // Check if any item in this section is lit
+    // Hide section if no items are lit OR if all lit items produce null conjugations
     const anyLit = sec.items.some(it => isLit(it.form));
+    const anyReal = anyLit && cur && sec.items.some(it => isLit(it.form) && getConjParts(cur, it.id));
 
     const wrapper = document.createElement('div');
-    wrapper.className = 'conj-section' + (anyLit ? '' : ' hidden');
+    wrapper.className = 'conj-section' + (anyReal ? '' : ' hidden');
 
     const h=document.createElement('div');
     h.className='conj-section-title';
