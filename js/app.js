@@ -293,9 +293,10 @@ let excFilter=false;
 // CONJUGATION ENGINE
 // =====================================================================
 
-const DRILLABLE = new Set(['eru','passive','causative','causepass','teiru','te','adj_sugiru','adj_naru','adj_suru']);
+const DRILLABLE = new Set(['eru','passive','causative','causepass','te','adj_sugiru','adj_naru','adj_suru']);
 
 const TE_COMPOUNDS = [
+  {id:'te_iru',    suf:'いる',   lb:'ている',   desc:'progressive / state', en:v=>`is ${enBase(v)}ing`,     drillType:'ichidan'},
   {id:'te_shimau', suf:'しまう', lb:'てしまう', desc:'completion / regret', en:v=>`end up ${enBase(v)}ing`, drillType:'godan'},
   {id:'te_miru',   suf:'みる',   lb:'てみる',   desc:'try doing',          en:v=>`try ${enBase(v)}ing`,    drillType:'ichidan'},
   {id:'te_oku',    suf:'おく',   lb:'ておく',   desc:'do in advance',      en:v=>`${enBase(v)} in advance`, drillType:'godan'},
@@ -303,11 +304,11 @@ const TE_COMPOUNDS = [
   {id:'te_ageru',  suf:'あげる', lb:'てあげる', desc:'do for someone',     en:v=>`${enBase(v)} for someone`, drillType:'ichidan'},
   {id:'te_morau',  suf:'もらう', lb:'てもらう', desc:'have someone do',    en:v=>`have someone ${enBase(v)}`, drillType:'godan'},
   {id:'te_kureru', suf:'くれる', lb:'てくれる', desc:'someone does for me',en:v=>`someone ${enBase(v)}s for me`, drillType:'ichidan'},
+  {id:'te_kuru',   suf:'くる',   lb:'てくる',   desc:'gradual change / coming', en:v=>`${enBase(v)} (coming/gradual)`, drillType:'irregular'},
+  {id:'te_iku',    suf:'いく',   lb:'ていく',   desc:'going / continuing',     en:v=>`${enBase(v)} (going/ongoing)`,  drillType:'godan'},
   {id:'te_kudasai',suf:'ください',lb:'てください',desc:'please do (polite)', en:v=>`please ${enBase(v)}`, drillType:null},
   {id:'te_moii',   suf:'もいい', lb:'てもいい', desc:'permission',         en:v=>`may ${enBase(v)}`, drillType:null},
   {id:'te_ikena',  suf:'はいけない',lb:'てはいけない',desc:'prohibition',  en:v=>`must not ${enBase(v)}`, drillType:null},
-  {id:'te_kuru', suf:'くる', lb:'てくる', desc:'gradual change / coming', en:v=>`${enBase(v)} (coming/gradual)`, drillType:'irregular'},
-  {id:'te_iku',  suf:'いく', lb:'ていく', desc:'going / continuing',     en:v=>`${enBase(v)} (going/ongoing)`,  drillType:'godan'},
 ];
 
 function enBase(v) { return v.m.replace('to ','').replace(/,.*$/,''); }
@@ -363,13 +364,6 @@ function CONJS(isDrilled) {
     {id:'cond',   lb:'ば conditional', en:v=>`if ${enBase(v)}`, form:'e', cl:'brown'},
     {id:'tara',   lb:'たら conditional', en:v=>`if/when ${enBase(v)}`, form:'ta', cl:'brown'},
   ]});
-
-  // Progressive (drillable)
-  if (!isDrilled) {
-    sections.push({sec:'Progressive -- drillable', items:[
-      {id:'teiru',  lb:'ている (ongoing)', en:v=>`is ${enBase(v)}ing`, form:'te', cl:'teal', drillable:true},
-    ]});
-  }
 
   // Imperative
   sections.push({sec:'Imperative', items:[
