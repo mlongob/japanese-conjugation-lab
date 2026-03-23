@@ -282,6 +282,7 @@ let endingRemoved=false; // for ichidan: has る been removed?
 
 // Drill-down stack
 let drillStack=[];
+let teCompoundMode = false;
 
 // Search & filter state
 let searchQuery='';
@@ -292,7 +293,20 @@ let excFilter=false;
 // CONJUGATION ENGINE
 // =====================================================================
 
-const DRILLABLE = new Set(['eru','passive','causative','causepass','teiru']);
+const DRILLABLE = new Set(['eru','passive','causative','causepass','teiru','te']);
+
+const TE_COMPOUNDS = [
+  {id:'te_shimau', suf:'しまう', lb:'てしまう', desc:'completion / regret', en:v=>`end up ${enBase(v)}ing`, drillType:'godan'},
+  {id:'te_miru',   suf:'みる',   lb:'てみる',   desc:'try doing',          en:v=>`try ${enBase(v)}ing`,    drillType:'ichidan'},
+  {id:'te_oku',    suf:'おく',   lb:'ておく',   desc:'do in advance',      en:v=>`${enBase(v)} in advance`, drillType:'godan'},
+  {id:'te_aru',    suf:'ある',   lb:'てある',   desc:'resultative state',   en:v=>`is ${enBase(v)}ed (state)`, drillType:'aru'},
+  {id:'te_ageru',  suf:'あげる', lb:'てあげる', desc:'do for someone',     en:v=>`${enBase(v)} for someone`, drillType:'ichidan'},
+  {id:'te_morau',  suf:'もらう', lb:'てもらう', desc:'have someone do',    en:v=>`have someone ${enBase(v)}`, drillType:'godan'},
+  {id:'te_kureru', suf:'くれる', lb:'てくれる', desc:'someone does for me',en:v=>`someone ${enBase(v)}s for me`, drillType:'ichidan'},
+  {id:'te_kudasai',suf:'ください',lb:'てください',desc:'please do (polite)', en:v=>`please ${enBase(v)}`, drillType:null},
+  {id:'te_moii',   suf:'もいい', lb:'てもいい', desc:'permission',         en:v=>`may ${enBase(v)}`, drillType:null},
+  {id:'te_ikena',  suf:'はいけない',lb:'てはいけない',desc:'prohibition',  en:v=>`must not ${enBase(v)}`, drillType:null},
+];
 
 function enBase(v) { return v.m.replace('to ','').replace(/,.*$/,''); }
 
@@ -361,7 +375,7 @@ function CONJS(isDrilled) {
     {id:'koto',   lb:'こと (noun)',        en:v=>`${enBase(v)}ing (noun)`, form:'u', cl:'teal'},
     {id:'no',     lb:'の (noun)',          en:v=>`${enBase(v)}ing (noun)`, form:'u', cl:'teal'},
     {id:'na',     lb:"don't! (command)",  en:v=>`don't ${enBase(v)}!`, form:'u', cl:'red'},
-    {id:'te',     lb:'て form',            en:v=>`${enBase(v)}! / and...`, form:'te', cl:'yellow'},
+    {id:'te',     lb:'て form [expand]',   en:v=>`${enBase(v)}! / and...`, form:'te', cl:'yellow', drillable:true},
     {id:'ta',     lb:'た form (past)',     en:v=>`did ${enBase(v)} (informal)`, form:'ta', cl:'yellow'},
   ]});
 
@@ -580,9 +594,11 @@ function partsIrr(v, cid) {
     if(!map[cid]) return null;
     const m=map[cid];
     return { full:m.sk+m.sf, root:'', stemKana:m.sk, suffix:m.sf };
-  } else if(v.r==='ある') {
+  } else if(v.r.endsWith('ある')) {
     // ある is irregular: negative is ない (not あらない)
     // No potential, passive, causative, causative-passive, or imperative forms
+    // Handles both standalone ある and compound てある
+    const prefix = v.r.slice(0, -2);
     const base = {
       masu:{sk:'あり',sf:'ます'},mashita:{sk:'あり',sf:'ました'},
       masen:{sk:'あり',sf:'ません'},msndsh:{sk:'あり',sf:'ませんでした'},
@@ -597,7 +613,7 @@ function partsIrr(v, cid) {
     };
     if(!base[cid]) return null;
     const m=base[cid];
-    return { full:m.sk+m.sf, root:'', stemKana:m.sk, suffix:m.sf };
+    return { full:prefix+m.sk+m.sf, root:prefix, stemKana:m.sk, suffix:m.sf };
   }
   return null;
 }
@@ -723,9 +739,12 @@ function isLit(form) {
 function getDrillLabel(cid) {
   const labels = {
     eru:'potential', passive:'passive', causative:'causative', causepass:'causative-passive',
-    teiru:'progressive'
+    teiru:'progressive', te:'て form'
   };
-  return labels[cid]||cid;
+  if (labels[cid]) return labels[cid];
+  const tc = TE_COMPOUNDS.find(c => c.id === cid);
+  if (tc) return tc.lb;
+  return cid;
 }
 
 function getDrillMeaning(baseVerb, cid) {
@@ -736,12 +755,29 @@ function getDrillMeaning(baseVerb, cid) {
     causative:`to make/let ${b}`,
     causepass:`to be made to ${b}`,
     teiru:`to be ${b}ing`,
+    te:`${baseVerb.m} (て form)`,
   };
-  return meanings[cid]||baseVerb.m;
+  if (meanings[cid]) return meanings[cid];
+  // Check TE_COMPOUNDS
+  const tc = TE_COMPOUNDS.find(c => c.id === cid);
+  if (tc) return 'to ' + tc.en(baseVerb);
+  return baseVerb.m;
 }
 
 function drillInto(cid) {
   if(cur.t==='i-adj' || cur.t==='na-adj' || cur.t==='noun') return;
+
+  if(cid === 'te') {
+    // て form opens compound selection panel
+    drillStack.push({ verb:cur, conjId:cid, label:'て form', selVowel, endingRemoved });
+    teCompoundMode = true;
+    selConj = null;
+    selVowel = null;
+    endingRemoved = false;
+    render();
+    return;
+  }
+
   const full = getFullConj(cur, cid);
   if(!full || !full.endsWith('る')) return;
 
@@ -765,7 +801,47 @@ function drillInto(cid) {
   render();
 }
 
+function drillTeCompound(compound) {
+  // Get the base verb (the one we drilled て from)
+  const baseEntry = drillStack[drillStack.length - 1];
+  const baseVerb = baseEntry.verb;
+  const teForm = getFullConj(baseVerb, 'te');
+  if (!teForm) return;
+  const full = teForm + compound.suf;
+
+  if (!compound.drillType) {
+    // Terminal phrase -- just show in tiles
+    selConj = selConj === compound.id ? null : compound.id;
+    render();
+    return;
+  }
+
+  // Determine the drilled verb type
+  let newType;
+  if (compound.drillType === 'ichidan') newType = 'drilled';
+  else if (compound.drillType === 'aru') newType = 'irregular';
+  else newType = compound.drillType; // 'godan'
+
+  drillStack.push({
+    verb: cur, conjId: compound.id,
+    label: compound.lb, selVowel: null, endingRemoved: false,
+  });
+
+  cur = {
+    k: full, r: full,
+    m: 'to ' + compound.en(baseVerb),
+    t: newType,
+  };
+  teCompoundMode = false;
+  selVowel = null;
+  selConj = null;
+  // Auto-remove ending for ichidan drilled verbs
+  endingRemoved = (compound.drillType === 'ichidan');
+  render();
+}
+
 function drillBack(toIndex) {
+  teCompoundMode = false;
   if(toIndex < 0 || toIndex >= drillStack.length) {
     const base = drillStack[0];
     cur = base.verb;
@@ -816,6 +892,36 @@ function renderTiles() {
   if(charCount > 10) el.classList.add('very-compact');
   else if(charCount > 7) el.classList.add('compact');
 
+  // Handle て compound terminal phrase display
+  if (selConj && teCompoundMode) {
+    const compound = TE_COMPOUNDS.find(c => c.id === selConj);
+    if (compound) {
+      const baseEntry = drillStack[drillStack.length - 1];
+      const baseVerb = baseEntry.verb;
+      const teForm = getFullConj(baseVerb, 'te');
+      if (teForm) {
+        const teChars = [...teForm];
+        const sufChars = [...compound.suf];
+        const allChars = [...teChars, ...sufChars];
+        const total = Math.max(N, allChars.length);
+        let cc = allChars.length;
+        if (cc > 10) el.classList.add('very-compact');
+        else if (cc > 7) el.classList.add('compact');
+        for (let i = 0; i < total; i++) {
+          const d = document.createElement('div');
+          d.className = 'tile-slot';
+          if (i < allChars.length) {
+            d.textContent = allChars[i];
+            if (i < teChars.length) d.classList.add('stem-new');
+            else d.classList.add('conj-part');
+          }
+          el.appendChild(d);
+        }
+        return;
+      }
+    }
+  }
+
   if(selConj && cur) {
     const parts=getConjParts(cur,selConj);
     if(parts) {
@@ -825,7 +931,8 @@ function renderTiles() {
       const allChars=[...rootChars,...stemChars,...sufChars];
       const total=Math.max(N,allChars.length);
 
-      const isDrillable = DRILLABLE.has(selConj) && parts.full.endsWith('る') && drillStack.length < 3;
+      const isDrillable = (DRILLABLE.has(selConj) && parts.full.endsWith('る') && drillStack.length < 3)
+                       || (DRILLABLE.has(selConj) && selConj === 'te' && drillStack.length < 3);
 
       for(let i=0;i<total;i++) {
         const d=document.createElement('div');
@@ -838,7 +945,7 @@ function renderTiles() {
             d.classList.add('stem-new');
           } else {
             d.classList.add('conj-part');
-            if(isDrillable && i===allChars.length-1 && allChars[i]==='る') {
+            if(isDrillable && i===allChars.length-1 && (allChars[i]==='る' || selConj === 'te')) {
               d.classList.remove('conj-part');
               d.classList.add('ending');
               d.title='Click to drill deeper into this conjugation';
@@ -917,6 +1024,11 @@ function renderHint() {
   const el=document.getElementById('tileHint');
   if(!cur) { el.textContent=''; return; }
 
+  if (teCompoundMode) {
+    el.textContent = 'Select a て compound to drill deeper, or a phrase to see the full form';
+    return;
+  }
+
   const isIchi = cur.t==='ichidan'||cur.t==='drilled';
   const isGodan = cur.t==='godan';
 
@@ -943,8 +1055,8 @@ function renderHint() {
     // Check if drillable
     const isDrillable = DRILLABLE.has(selConj) && drillStack.length < 3;
     const parts = getConjParts(cur, selConj);
-    if(isDrillable && parts && parts.full.endsWith('る')) {
-      el.textContent='Click the gold る to drill deeper into this form';
+    if(isDrillable && parts && (parts.full.endsWith('る') || selConj === 'te')) {
+      el.textContent = selConj === 'te' ? 'Click the gold て tile to expand て compounds' : 'Click the gold る to drill deeper into this form';
     } else {
       // Show english meaning
       const defs=getAllConjItems();
@@ -981,7 +1093,13 @@ function renderInfo() {
   else { cls='irregular'; txt='Irregular'; }
   tEl.innerHTML=`<span class="verb-type-badge ${cls}">${txt}</span>`;
 
-  if(selConj&&cur) {
+  if (teCompoundMode && selConj) {
+    const compound = TE_COMPOUNDS.find(c => c.id === selConj);
+    if (compound) {
+      const baseVerb = drillStack[drillStack.length - 1]?.verb;
+      if (baseVerb) eEl.textContent = compound.en(baseVerb);
+    }
+  } else if(selConj&&cur) {
     const defs=getAllConjItems();
     const it=defs.find(x=>x.id===selConj);
     if(it) eEl.textContent=it.en(cur);
@@ -1022,7 +1140,7 @@ function renderDrillBar() {
 
   const hint=document.createElement('span');
   hint.className='drill-hint';
-  hint.textContent='click る to go deeper';
+  hint.textContent = teCompoundMode ? 'select a て compound' : 'click る to go deeper';
   bar.appendChild(hint);
 
   el.appendChild(bar);
@@ -1031,6 +1149,15 @@ function renderDrillBar() {
 function renderChart() {
   const g=document.getElementById('chart');
   g.innerHTML='';
+
+  if (teCompoundMode) {
+    g.style.display = 'block';
+    const baseEntry = drillStack[drillStack.length - 1];
+    const baseVerb = baseEntry?.verb;
+    const teForm = baseVerb ? getFullConj(baseVerb, 'te') : '';
+    g.innerHTML = '<div class="ref-card"><div class="ref-title">て Form Compounds</div><div class="ref-stem">' + (teForm || '') + '</div><div class="ref-hint">Select a compound to conjugate the combined form,<br>or a fixed phrase to see the complete expression</div></div>';
+    return;
+  }
 
   // For non-verb tabs, show a reference card instead of the kana chart
   if(cur && (cur.t==='i-adj' || cur.t==='na-adj' || cur.t==='noun')) {
@@ -1107,9 +1234,69 @@ function renderChart() {
   });
 }
 
+function renderTeCompounds() {
+  const p = document.getElementById('conjP');
+  p.innerHTML = '';
+
+  // Get the base verb from drill stack
+  const baseEntry = drillStack[drillStack.length - 1];
+  const baseVerb = baseEntry.verb;
+  const teForm = getFullConj(baseVerb, 'te');
+  if (!teForm) return;
+
+  // Section: Drillable compounds
+  const drillSection = document.createElement('div');
+  drillSection.className = 'conj-section';
+  const drillTitle = document.createElement('div');
+  drillTitle.className = 'conj-section-title';
+  drillTitle.textContent = 'て + Verb Compounds (click to drill deeper)';
+  drillSection.appendChild(drillTitle);
+
+  const drillGrid = document.createElement('div');
+  drillGrid.className = 'conj-grid';
+  TE_COMPOUNDS.filter(c => c.drillType).forEach(compound => {
+    const c = document.createElement('div');
+    c.className = 'cc teal lit';
+    if (selConj === compound.id) c.classList.add('selected');
+    c.innerHTML = compound.suf + `<span class="lb">${compound.desc}</span>`;
+    c.onclick = () => drillTeCompound(compound);
+    drillGrid.appendChild(c);
+  });
+  drillSection.appendChild(drillGrid);
+  p.appendChild(drillSection);
+
+  // Section: Fixed phrases
+  const fixedSection = document.createElement('div');
+  fixedSection.className = 'conj-section';
+  const fixedTitle = document.createElement('div');
+  fixedTitle.className = 'conj-section-title';
+  fixedTitle.textContent = 'て + Fixed Phrases';
+  fixedSection.appendChild(fixedTitle);
+
+  const fixedGrid = document.createElement('div');
+  fixedGrid.className = 'conj-grid';
+  TE_COMPOUNDS.filter(c => !c.drillType).forEach(compound => {
+    const c = document.createElement('div');
+    c.className = 'cc yellow lit';
+    if (selConj === compound.id) c.classList.add('selected');
+    c.innerHTML = compound.suf + `<span class="lb">${compound.desc}</span>`;
+    c.onclick = () => {
+      selConj = selConj === compound.id ? null : compound.id;
+      render();
+    };
+    fixedGrid.appendChild(c);
+  });
+  fixedSection.appendChild(fixedGrid);
+  p.appendChild(fixedSection);
+}
+
 function renderConj() {
   const p=document.getElementById('conjP');
   p.innerHTML='';
+  if (teCompoundMode) {
+    renderTeCompounds();
+    return;
+  }
   const isDrilled = drillStack.length > 0;
   const isAdj = cur && (cur.t==='i-adj' || cur.t==='na-adj');
   const isNoun = cur && cur.t==='noun';
@@ -1319,6 +1506,7 @@ function pushState() {
   if(drillStack.length > 0) {
     p.set('d', drillStack.map(e => e.conjId).join(','));
   }
+  if(teCompoundMode) p.set('tem','1');
   history.replaceState(null, '', '#' + p.toString());
 }
 
@@ -1344,6 +1532,34 @@ function loadFromURL() {
   const drills = p.get('d');
   if(drills) {
     for(const cid of drills.split(',')) {
+      if(cid === 'te') {
+        // て form opens compound selection - just push to stack, don't change cur
+        drillStack.push({
+          verb: cur, conjId: cid,
+          label: getDrillLabel(cid),
+          selVowel: null, endingRemoved: false,
+        });
+        continue;
+      }
+      // Check if this is a TE_COMPOUND
+      const tc = TE_COMPOUNDS.find(c => c.id === cid);
+      if(tc) {
+        const teBaseEntry = drillStack[drillStack.length - 1];
+        const teForm = getFullConj(teBaseEntry.verb, 'te');
+        if(!teForm) break;
+        const full = teForm + tc.suf;
+        let newType;
+        if (tc.drillType === 'ichidan') newType = 'drilled';
+        else if (tc.drillType === 'aru') newType = 'irregular';
+        else newType = tc.drillType;
+        drillStack.push({
+          verb: cur, conjId: cid,
+          label: getDrillLabel(cid),
+          selVowel: null, endingRemoved: false,
+        });
+        cur = { k: full, r: full, m: getDrillMeaning(drillStack[0].verb, cid), t: newType };
+        continue;
+      }
       const full = getFullConj(cur, cid);
       if(!full || !full.endsWith('る')) break;
       drillStack.push({
@@ -1359,6 +1575,7 @@ function loadFromURL() {
   if(p.get('ru') === '0') endingRemoved = true;
   if(p.get('f')) selVowel = p.get('f');
   if(p.get('c')) selConj = p.get('c');
+  if(p.get('tem')==='1') teCompoundMode = true;
 
   return true;
 }
@@ -1369,7 +1586,7 @@ function loadFromURL() {
 
 function switchTab(tab) {
   activeTab = tab;
-  cur = null; selVowel = null; selConj = null; endingRemoved = false; drillStack = [];
+  cur = null; selVowel = null; selConj = null; endingRemoved = false; drillStack = []; teCompoundMode = false;
   render();
   document.querySelectorAll('.tab').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === tab);
@@ -1377,7 +1594,7 @@ function switchTab(tab) {
 }
 
 function loadVerb(v) {
-  cur=v; selVowel=null; selConj=null; endingRemoved=false; drillStack=[];
+  cur=v; selVowel=null; selConj=null; endingRemoved=false; drillStack=[]; teCompoundMode=false;
   render();
 }
 
@@ -1394,7 +1611,7 @@ function getRandomWord() {
   loadVerb(pool[Math.floor(Math.random()*pool.length)]);
 }
 
-function clearAll() { cur=null; selVowel=null; selConj=null; endingRemoved=false; drillStack=[]; render(); }
+function clearAll() { cur=null; selVowel=null; selConj=null; endingRemoved=false; drillStack=[]; teCompoundMode=false; render(); }
 
 // =====================================================================
 // INIT
