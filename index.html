@@ -837,6 +837,7 @@ function render() {
   renderConj();
   renderBar();
   renderFilterBtns();
+  pushState();
 }
 
 function renderTiles() {
@@ -1242,6 +1243,59 @@ function toggleExc() {
   renderBar();
 }
 
+// ===== URL STATE =====
+function pushState() {
+  if(!cur) { history.replaceState(null,'',location.pathname); return; }
+  const p = new URLSearchParams();
+  p.set('v', cur.r); // use reading as verb identifier
+  if(selVowel) p.set('f', selVowel);
+  if(ruRemoved) p.set('ru', '0');
+  if(selConj) p.set('c', selConj);
+  if(drillStack.length > 0) {
+    p.set('d', drillStack.map(e => e.conjId).join(','));
+  }
+  history.replaceState(null, '', '#' + p.toString());
+}
+
+function loadFromURL() {
+  const hash = location.hash.slice(1);
+  if(!hash) return false;
+  const p = new URLSearchParams(hash);
+  const reading = p.get('v');
+  if(!reading) return false;
+
+  const verb = VERBS.find(v => v.r === reading);
+  if(!verb) return false;
+
+  cur = verb;
+  selVowel = null;
+  selConj = null;
+  ruRemoved = false;
+  drillStack = [];
+
+  // Replay drill-down stack
+  const drills = p.get('d');
+  if(drills) {
+    for(const cid of drills.split(',')) {
+      const full = getFullConj(cur, cid);
+      if(!full || !full.endsWith('\u308B')) break;
+      drillStack.push({
+        verb: cur, conjId: cid,
+        label: getDrillLabel(cid),
+        selVowel: null, ruRemoved: false,
+      });
+      cur = { k: full, r: full, m: getDrillMeaning(drillStack[0].verb, cid), t: 'drilled' };
+    }
+  }
+
+  // Restore state
+  if(p.get('ru') === '0') ruRemoved = true;
+  if(p.get('f')) selVowel = p.get('f');
+  if(p.get('c')) selConj = p.get('c');
+
+  return true;
+}
+
 // ===== ACTIONS =====
 function loadVerb(v) {
   cur=v; selVowel=null; selConj=null; ruRemoved=false; drillStack=[];
@@ -1253,9 +1307,13 @@ function getRandomVerb() {
   loadVerb(pool[Math.floor(Math.random()*pool.length)]);
 }
 function clearAll() { cur=null; selVowel=null; selConj=null; ruRemoved=false; drillStack=[]; render(); }
+
 // ===== INIT =====
-render();
-loadVerb(VERBS.find(v=>v.k==='\u884C\u304F'));
+if(!loadFromURL()) {
+  loadVerb(VERBS.find(v=>v.k==='\u884C\u304F'));
+} else {
+  render();
+}
 </script>
 </body>
 </html>
