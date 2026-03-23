@@ -98,7 +98,7 @@
   .btn-sm.clear:hover { background:#4a3838; color:#e0a0a0; }
 
   /* CONTENT - wider kana table */
-  .content-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .content-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
 
   /* HIRAGANA */
   .hiragana-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; }
@@ -131,7 +131,8 @@
   }
 
   /* RIGHT PANEL */
-  .right-panel { display:flex; flex-direction:column; gap:8px; }
+  .right-panel { display:flex; flex-direction:column; }
+  .right-panel #drillBar:not(:empty) { margin-bottom:6px; }
 
   /* CONJUGATION TABLE - multi-column masonry layout */
   .conj-panel {
