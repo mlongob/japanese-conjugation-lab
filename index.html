@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japanese Verb Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&family=Nunito:wght@600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-height:100vh; }
+
+  /* HEADER */
+  .header {
+    position:relative;
+    background:linear-gradient(180deg,#6EC6FF 0%,#87CEEB 30%,#a8d8ea 50%,#c5e8c5 75%,#6aaa6a 100%);
+    height:90px; overflow:hidden; display:flex; align-items:flex-end; padding:0 20px 8px;
+  }
+  .header svg { position:absolute; bottom:-2px; left:50%; transform:translateX(-50%); width:400px; height:90px; }
+  .cloud { position:absolute; background:rgba(255,255,255,0.7); border-radius:20px; height:16px; }
+  .cloud:nth-child(1){width:70px;left:8%;top:12px} .cloud:nth-child(2){width:50px;left:25%;top:22px}
+  .cloud:nth-child(3){width:90px;right:12%;top:10px} .cloud:nth-child(4){width:40px;right:30%;top:25px}
+  .header-title { position:relative; z-index:5; }
+  .header-title h1 { font-weight:900; font-size:20px; color:#1a3a5c; text-shadow:1px 1px 0 rgba(255,255,255,0.6); line-height:1.1; }
+  .header-title .sub { font-size:11px; color:#b33; font-weight:700; }
+  .header .deco { position:absolute; bottom:2px; z-index:3; opacity:0.35; }
+  .header .deco.r1 { right:30px; font-size:30px; }
+  .header .deco.r2 { right:100px; font-size:36px; }
+
+  /* APP */
+  .app { max-width:1200px; margin:0 auto; padding:10px 14px; display:flex; flex-direction:column; gap:10px; }
+
+  /* TILES */
+  .top-row { display:flex; align-items:center; gap:16px; }
+  .tile-slots { display:flex; gap:5px; }
+  .tile-slot {
+    width:68px; height:68px;
+    background:linear-gradient(180deg,#b8dff0,#8ec5db);
+    border-radius:8px; border:2px solid #6aa8c0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'M PLUS Rounded 1c',sans-serif; font-size:34px; font-weight:800; color:#1a3a5c;
+    box-shadow:inset 0 -2px 4px rgba(0,0,0,0.1),0 2px 4px rgba(0,0,0,0.2);
+    transition:all 0.15s; cursor:default;
+  }
+  .tile-slot.filled { background:linear-gradient(180deg,#fff,#e4f0fa); border-color:#4a9ac0; }
+  .tile-slot.ending {
+    background:linear-gradient(180deg,#ffe77a,#f0c030); border-color:#c89800;
+    box-shadow:0 0 12px rgba(240,192,48,0.5); cursor:pointer;
+  }
+  .tile-slot.ending:hover { background:linear-gradient(180deg,#fff0a0,#f0d050); }
+  .tile-slot.removed {
+    background:linear-gradient(180deg,#b8dff0,#8ec5db); border-color:#6aa8c0;
+    color:transparent;
+  }
+  .tile-slot.stem-new {
+    background:linear-gradient(180deg,#a0e8a0,#60c060); border-color:#40a040;
+    box-shadow:0 0 10px rgba(80,180,80,0.4);
+  }
+  .tile-slot.conj-part {
+    background:linear-gradient(180deg,#f0b0ff,#d070e0); border-color:#a050b0;
+    box-shadow:0 0 10px rgba(200,100,220,0.4);
+  }
+
+  .verb-info { flex:1; min-width:0; }
+  .verb-info .kanji-line { font-family:'M PLUS Rounded 1c',sans-serif; font-size:20px; font-weight:800; color:#d0d8e0; }
+  .verb-info .kanji-line .big { font-size:24px; }
+  .verb-info .meaning-line { font-size:12px; color:#8899aa; margin-top:1px; }
+  .verb-info .english-line { font-size:15px; color:#f0e070; font-weight:700; margin-top:4px; min-height:20px; }
+  .verb-type-badge { display:inline-block; margin-top:3px; padding:1px 10px; border-radius:8px; font-size:10px; font-weight:800; text-transform:uppercase; }
+  .verb-type-badge.godan { background:#2a9d5c; color:#fff; }
+  .verb-type-badge.ichidan { background:#d03030; color:#fff; }
+  .verb-type-badge.irregular { background:#7044aa; color:#fff; }
+
+  /* CONTENT */
+  .content-row { display:grid; grid-template-columns:1fr 340px; gap:12px; }
+
+  /* HIRAGANA */
+  .hiragana-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; }
+  .chart-grid { display:grid; grid-template-columns:44px repeat(9,1fr); gap:2px; }
+  .row-label {
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:800; color:#556677; border-radius:4px;
+    text-align:center; line-height:1.2; white-space:pre-line; padding:4px 2px; user-select:none;
+  }
+  .kana-cell {
+    display:flex; align-items:center; justify-content:center;
+    font-family:'M PLUS Rounded 1c',sans-serif; font-size:19px; font-weight:700;
+    padding:7px 2px; border-radius:5px; background:#223044; color:#667788;
+    cursor:default; transition:all 0.12s; border:1px solid transparent; user-select:none;
+  }
+  .kana-cell.empty { background:transparent; }
+  .kana-cell.verb-ending {
+    background:linear-gradient(135deg,#e88a10,#cc7000); color:#fff; border-color:#aa5500;
+    box-shadow:0 0 10px rgba(232,138,16,0.45); font-weight:900; cursor:pointer;
+  }
+  .kana-cell.verb-ending:hover { background:linear-gradient(135deg,#f0a030,#dd8818); }
+  .kana-cell.col-clickable {
+    background:#2a3a58; color:#99aacc; border-color:#3a4a68; cursor:pointer;
+  }
+  .kana-cell.col-clickable:hover { background:#3a4a70; color:#bbccee; border-color:#5a6a88; }
+  .kana-cell.active-stem {
+    background:linear-gradient(135deg,#2080d0,#1868b0); color:#fff; border-color:#1058a0;
+    box-shadow:0 0 8px rgba(32,128,208,0.4); cursor:pointer;
+  }
+
+  /* RIGHT PANEL */
+  .right-panel { display:flex; flex-direction:column; gap:8px; }
+  .controls-row { display:flex; gap:6px; }
+  .btn { padding:7px 16px; border:none; border-radius:7px; font-family:'Nunito',sans-serif; font-weight:800; font-size:12px; cursor:pointer; transition:all 0.12s; }
+  .btn:active { transform:scale(0.96); }
+  .btn-get { background:linear-gradient(180deg,#30b060,#28a050); color:#fff; flex:1; }
+  .btn-get:hover { background:linear-gradient(180deg,#28a050,#209040); }
+  .btn-clear { background:linear-gradient(180deg,#d04040,#b83030); color:#fff; }
+  .btn-clear:hover { background:linear-gradient(180deg,#b83030,#a02828); }
+  .type-toggle { display:flex; gap:4px; }
+  .btn-type {
+    flex:1; padding:7px 6px; border:2px solid #334; border-radius:7px;
+    background:#1c2838; color:#556; font-family:'Nunito',sans-serif; font-weight:800; font-size:10px;
+    cursor:pointer; transition:all 0.15s; text-align:center;
+  }
+  .btn-type.on-godan { background:linear-gradient(180deg,#2a9d5c,#228a4c); color:#fff; border-color:#2a9d5c; }
+  .btn-type.on-ichidan { background:linear-gradient(180deg,#d03030,#b82828); color:#fff; border-color:#d03030; }
+
+  /* CONJUGATION TABLE */
+  .conj-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:8px; border:1px solid #2a3a50; flex:1; overflow-y:auto; }
+  .conj-section-title { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#556677; padding:4px 4px 2px; margin-top:6px; }
+  .conj-section-title:first-child { margin-top:0; }
+  .conj-row { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; margin-bottom:2px; }
+  .conj-row.c5 { grid-template-columns:repeat(5,1fr); }
+  .conj-row.c3 { grid-template-columns:repeat(3,1fr); }
+  .conj-row.c2 { grid-template-columns:repeat(2,1fr); }
+  .conj-row.c1 { grid-template-columns:1fr; }
+  .cc {
+    padding:5px 3px; border-radius:5px;
+    font-family:'M PLUS Rounded 1c',sans-serif; font-size:12px; font-weight:700;
+    text-align:center; line-height:1.25; transition:all 0.15s; cursor:default;
+  }
+  .cc .lb { display:block; font-family:'Nunito',sans-serif; font-size:8px; font-weight:700; opacity:0.6; margin-top:1px; }
+  .cc.off { background:#151d2a; color:#2a3040; }
+  .cc.off .lb { opacity:0.3; }
+  .cc.lit { cursor:pointer; }
+  .cc.lit:hover { filter:brightness(1.2); transform:scale(1.03); }
+  .cc.lit.selected { outline:2px solid #fff; outline-offset:-2px; }
+  .cc.blue { background:linear-gradient(135deg,#2060b0,#2878cc); color:#fff; }
+  .cc.green { background:linear-gradient(135deg,#228a4c,#2a9d5c); color:#fff; }
+  .cc.red { background:linear-gradient(135deg,#b03030,#cc3838); color:#fff; }
+  .cc.orange { background:linear-gradient(135deg,#c07018,#d88828); color:#fff; }
+  .cc.purple { background:linear-gradient(135deg,#6638a0,#7a48b8); color:#fff; }
+  .cc.yellow { background:linear-gradient(135deg,#b89810,#d0b020); color:#111; }
+  .cc.teal { background:linear-gradient(135deg,#1a8080,#20a0a0); color:#fff; }
+  .cc.pink { background:linear-gradient(135deg,#b03068,#d04888); color:#fff; }
+
+  /* DRILL BREADCRUMB */
+  .drill-bar {
+    display:flex; align-items:center; gap:6px; padding:4px 8px;
+    background:#151d2a; border-radius:6px; font-size:11px; font-weight:700;
+  }
+  .drill-bar .crumb {
+    color:#8899aa; cursor:pointer; transition:color 0.1s;
+  }
+  .drill-bar .crumb:hover { color:#bbccdd; }
+  .drill-bar .arrow { color:#445566; }
+  .drill-bar .crumb.current { color:#f0e070; cursor:default; }
+  .drill-bar .drill-hint {
+    margin-left:auto; font-size:9px; color:#556677; font-style:italic;
+  }
+
+  /* VERB SELECTOR */
+  .verb-selector {
+    background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px;
+    padding:10px 12px; border:1px solid #2a3a50;
+  }
+  .verb-group { margin-bottom:8px; }
+  .verb-group:last-child { margin-bottom:0; }
+  .verb-group-label {
+    font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px;
+    margin-bottom:4px; padding-left:2px;
+  }
+  .verb-group-label.godan-label { color:#3aba6a; }
+  .verb-group-label.ichidan-label { color:#e04848; }
+  .verb-group-label.irregular-label { color:#a060d0; }
+  .verb-group-chips { display:flex; flex-wrap:wrap; gap:4px; }
+  .vchip {
+    display:flex; flex-direction:column; align-items:center;
+    padding:4px 8px; min-width:56px;
+    border:2px solid #2a3a50; border-radius:7px; cursor:pointer; transition:all 0.12s;
+  }
+  .vchip:hover { filter:brightness(1.25); transform:translateY(-1px); }
+  .vchip.on { outline:2px solid #e08820; outline-offset:1px; }
+  .vchip.godan { background:linear-gradient(180deg,#1a3828,#1c2e22); border-color:#2a6040; }
+  .vchip.ichidan { background:linear-gradient(180deg,#381a1a,#2e1c1c); border-color:#6a2a2a; }
+  .vchip.irregular { background:linear-gradient(180deg,#2a1a38,#221c2e); border-color:#4a2a6a; }
+  .vchip .ck { font-family:'M PLUS Rounded 1c',sans-serif; font-size:15px; font-weight:800; color:#c0c8d0; }
+  .vchip .cr { font-family:'M PLUS Rounded 1c',sans-serif; font-size:9px; color:#667788; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="cloud"></div><div class="cloud"></div><div class="cloud"></div><div class="cloud"></div>
+  <svg viewBox="0 0 400 90" fill="none"><polygon points="200,5 80,90 320,90" fill="#7B9AAF"/><polygon points="200,5 170,28 230,28" fill="#E8EEF4"/><polygon points="170,28 155,40 200,38 245,40 230,28" fill="#D0DAE6" opacity="0.6"/></svg>
+  <div class="header-title"><h1>Japanese Verb Lab</h1><div class="sub">Verb Conjugation Tool</div></div>
+  <span class="deco r2">&#x26E9;</span><span class="deco r1">&#x1F3EF;</span>
+</div>
+<div class="app">
+  <div class="top-row">
+    <div class="tile-slots" id="tiles"></div>
+    <div class="verb-info">
+      <div class="kanji-line" id="vkanji"></div>
+      <div class="meaning-line" id="vmeaning"></div>
+      <div id="vtype"></div>
+      <div class="english-line" id="venglish"></div>
+    </div>
+  </div>
+  <div class="content-row">
+    <div class="hiragana-panel"><div class="chart-grid" id="chart"></div></div>
+    <div class="right-panel">
+      <div class="controls-row">
+        <button class="btn btn-get" onclick="getRandomVerb()">Get Verb</button>
+        <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="type-toggle">
+        <button class="btn-type" id="tgG" onclick="filterType('godan')">REGULAR (godan)</button>
+        <button class="btn-type" id="tgI" onclick="filterType('ichidan')">IRU/ERU (ichidan)</button>
+      </div>
+      <div id="drillBar"></div>
+      <div class="conj-panel" id="conjP"></div>
+    </div>
+  </div>
+  <div class="verb-selector" id="vbar"></div>
+</div>
+
+<script>
+// ===== DRILL-DOWN CONJUGATION TOOL =====
+// Supports recursive conjugation: forms like potential/passive/causative
+// produce new ichidan-like verbs that can be conjugated further.
+
+const ROWS=[
+  {l:'あ\nform',v:'a',k:['あ','か','が','さ','た','な','は','ま','ら']},
+  {l:'い\nform',v:'i',k:['い','き','ぎ','し','ち','に','び','み','り']},
+  {l:'う\nform',v:'u',k:['う','く','ぐ','す','つ','ぬ','ぶ','む','る']},
+  {l:'え\nform',v:'e',k:['え','け','げ','せ','て','ね','べ','め','れ']},
+  {l:'お\nform',v:'o',k:['お','こ','ご','そ','と','の','ぼ','も','ろ']},
+];
+const EXTRA=['や','ゆ','よ','わ','を','ん','','',''];
+
+const EC={'う':0,'く':1,'ぐ':2,'す':3,'つ':4,'ぬ':5,'ぶ':6,'む':7,'る':8};
+const ST={
+  0:{a:'わ',i:'い',u:'う',e:'え',o:'お'},
+  1:{a:'か',i:'き',u:'く',e:'け',o:'こ'},
+  2:{a:'が',i:'ぎ',u:'ぐ',e:'げ',o:'ご'},
+  3:{a:'さ',i:'し',u:'す',e:'せ',o:'そ'},
+  4:{a:'た',i:'ち',u:'つ',e:'て',o:'と'},
+  5:{a:'な',i:'に',u:'ぬ',e:'ね',o:'の'},
+  6:{a:'ば',i:'び',u:'ぶ',e:'べ',o:'ぼ'},
+  7:{a:'ま',i:'み',u:'む',e:'め',o:'も'},
+  8:{a:'ら',i:'り',u:'る',e:'れ',o:'ろ'},
+};
+const TETA={
+  'う':{te:'って',ta:'った'},'く':{te:'いて',ta:'いた'},'ぐ':{te:'いで',ta:'いだ'},
+  'す':{te:'して',ta:'した'},'つ':{te:'って',ta:'った'},'ぬ':{te:'んで',ta:'んだ'},
+  'ぶ':{te:'んで',ta:'んだ'},'む':{te:'んで',ta:'んだ'},'る':{te:'って',ta:'った'},
+};
+const SPEC={'いく':{te:'いって',ta:'いった'}};
+
+const VERBS=[
+  {k:'買う',r:'かう',m:'to buy',t:'godan'},
+  {k:'行く',r:'いく',m:'to go, to move (towards)',t:'godan'},
+  {k:'泳ぐ',r:'およぐ',m:'to swim',t:'godan'},
+  {k:'話す',r:'はなす',m:'to speak, to talk',t:'godan'},
+  {k:'待つ',r:'まつ',m:'to wait',t:'godan'},
+  {k:'死ぬ',r:'しぬ',m:'to die',t:'godan'},
+  {k:'遊ぶ',r:'あそぶ',m:'to play, to hang out',t:'godan'},
+  {k:'飲む',r:'のむ',m:'to drink',t:'godan'},
+  {k:'分かる',r:'わかる',m:'to understand',t:'godan'},
+  {k:'走る',r:'はしる',m:'to run',t:'godan'},
+  {k:'切る',r:'きる',m:'to cut',t:'godan'},
+  {k:'作る',r:'つくる',m:'to make, to create',t:'godan'},
+  {k:'送る',r:'おくる',m:'to send',t:'godan'},
+  {k:'帰る',r:'かえる',m:'to return home',t:'godan'},
+  {k:'乗る',r:'のる',m:'to ride',t:'godan'},
+  {k:'売る',r:'うる',m:'to sell',t:'godan'},
+  {k:'読む',r:'よむ',m:'to read',t:'godan'},
+  {k:'書く',r:'かく',m:'to write',t:'godan'},
+  {k:'立つ',r:'たつ',m:'to stand',t:'godan'},
+  {k:'持つ',r:'もつ',m:'to hold, to have',t:'godan'},
+  {k:'歌う',r:'うたう',m:'to sing',t:'godan'},
+  {k:'洗う',r:'あらう',m:'to wash',t:'godan'},
+  {k:'会う',r:'あう',m:'to meet',t:'godan'},
+  {k:'言う',r:'いう',m:'to say',t:'godan'},
+  {k:'思う',r:'おもう',m:'to think',t:'godan'},
+  {k:'知る',r:'しる',m:'to know',t:'godan'},
+  {k:'座る',r:'すわる',m:'to sit',t:'godan'},
+  {k:'取る',r:'とる',m:'to take',t:'godan'},
+  {k:'入る',r:'はいる',m:'to enter',t:'godan'},
+  {k:'食べる',r:'たべる',m:'to eat',t:'ichidan'},
+  {k:'見る',r:'みる',m:'to see, to look',t:'ichidan'},
+  {k:'出る',r:'でる',m:'to leave, to go out',t:'ichidan'},
+  {k:'着る',r:'きる',m:'to wear (upper body)',t:'ichidan'},
+  {k:'いる',r:'いる',m:'to be, to exist (animate)',t:'ichidan'},
+  {k:'起きる',r:'おきる',m:'to wake up',t:'ichidan'},
+  {k:'寝る',r:'ねる',m:'to sleep',t:'ichidan'},
+  {k:'開ける',r:'あける',m:'to open',t:'ichidan'},
+  {k:'閉める',r:'しめる',m:'to close',t:'ichidan'},
+  {k:'教える',r:'おしえる',m:'to teach',t:'ichidan'},
+  {k:'掛ける',r:'かける',m:'to hang, to call',t:'ichidan'},
+  {k:'借りる',r:'かりる',m:'to borrow',t:'ichidan'},
+  {k:'忘れる',r:'わすれる',m:'to forget',t:'ichidan'},
+  {k:'答える',r:'こたえる',m:'to answer',t:'ichidan'},
+  {k:'調べる',r:'しらべる',m:'to investigate',t:'ichidan'},
+  {k:'覚える',r:'おぼえる',m:'to memorize',t:'ichidan'},
+  {k:'する',r:'する',m:'to do',t:'irregular'},
+  {k:'来る',r:'くる',m:'to come',t:'irregular'},
+];
+const QBAR=[
+  // Godan - one for each ending kana, matching the video
+  '買う','行く','泳ぐ','話す','待つ','死ぬ','遊ぶ','飲む',
+  // Godan る-ending
+  '分かる','走る','帰る','切る',
+  // Ichidan
+  '食べる','見る','出る','着る','起きる','寝る','開ける','借りる','忘れる','掛ける',
+  // Irregular
+  'する','来る',
+];
+
+// ===== STATE =====
+let cur=null;       // current verb {k, r, m, t}
+let selVowel=null;  // selected vowel row 'a','i','u','e','o' or null
+let selConj=null;   // selected conjugation id or null
+let ruRemoved=false; // for ichidan: has る been removed?
+let filt=null;
+
+// Drill-down stack: each entry is {verb, conjId, label}
+// When you drill into a potential/passive/causative form,
+// the compound becomes a new ichidan verb to conjugate further
+let drillStack=[];  // stack of {verb, conjId, label, englishPrefix}
+
+// ===== CONJUGATION DEFINITIONS =====
+// Drillable forms produce new ichidan verbs ending in る
+// They get a special marker so we can offer drill-down
+const DRILLABLE = new Set(['eru','passive','causative','causepass']);
+
+function enBase(v) { return v.m.replace('to ','').replace(/,.*$/,''); }
+
+function CONJS(isDrilled) {
+  // When drilled, we show a subset - no further potential-of-potential,
+  // no volitional with う, but desire/polite/negative still work
+  const sections = [
+    {sec:'Polite (ます forms)', items:[
+      {id:'masu',   lb:'polite present',    en:v=>`will ${enBase(v)}`, form:'i', cl:'blue'},
+      {id:'mashita',lb:'polite past',       en:v=>`did ${enBase(v)}`, form:'i', cl:'blue'},
+      {id:'masen',  lb:'polite negative',   en:v=>`won't ${enBase(v)}`, form:'i', cl:'blue'},
+      {id:'msndsh', lb:'polite past neg',   en:v=>`didn't ${enBase(v)}`, form:'i', cl:'blue'},
+    ]},
+    {sec:'Desire / Let\'s', items:[
+      {id:'mashou', lb:"let's (polite)",    en:v=>`let's ${enBase(v)}`, form:'i', cl:'green'},
+      {id:'tai',    lb:'want to',           en:v=>`want to ${enBase(v)}`, form:'i', cl:'green'},
+      {id:'takatta',lb:'wanted to',         en:v=>`wanted to ${enBase(v)}`, form:'i', cl:'green'},
+      {id:'taknai', lb:"don't want to",     en:v=>`don't want to ${enBase(v)}`, form:'i', cl:'green'},
+      {id:'taknkt', lb:"didn't want to",    en:v=>`didn't want to ${enBase(v)}`, form:'i', cl:'green'},
+    ]},
+    {sec:'Informal Negative (あ form)', items:[
+      {id:'nai',    lb:'informal neg',      en:v=>`won't ${enBase(v)}`, form:'a', cl:'red'},
+      {id:'nakatta',lb:'informal past neg', en:v=>`didn't ${enBase(v)}`, form:'a', cl:'red'},
+      {id:'naide',  lb:"don't (request)",   en:v=>`don't ${enBase(v)}`, form:'a', cl:'red'},
+    ]},
+  ];
+
+  if (!isDrilled) {
+    // Full potential section for base verbs
+    sections.push({sec:'Potential (え form) — drillable', items:[
+      {id:'eru',    lb:'can (dictionary)',   en:v=>`can ${enBase(v)}`, form:'e', cl:'orange', drillable:true},
+    ]});
+    // Passive
+    sections.push({sec:'Passive (あ form + れる) — drillable', items:[
+      {id:'passive',lb:'passive (dictionary)',en:v=>`is ${enBase(v)}ed / gets ${enBase(v)}ed`, form:'a', cl:'pink', drillable:true},
+    ]});
+    // Causative
+    sections.push({sec:'Causative (あ form + せる) — drillable', items:[
+      {id:'causative',lb:'causative (dictionary)',en:v=>`make/let ${enBase(v)}`, form:'a', cl:'teal', drillable:true},
+    ]});
+    // Causative-passive
+    sections.push({sec:'Causative-Passive — drillable', items:[
+      {id:'causepass',lb:'causative-passive',en:v=>`is made to ${enBase(v)}`, form:'a', cl:'purple', drillable:true},
+    ]});
+  } else {
+    // When drilled, potential just shows the dictionary る form info
+    // but no further potential-of-potential
+  }
+
+  // Volitional
+  sections.push({sec:'Volitional (お form)', items:[
+    {id:'you',    lb:"let's (informal)",  en:v=>`let's ${enBase(v)}`, form:'o', cl:'yellow'},
+  ]});
+
+  // Dictionary / te / ta
+  sections.push({sec:'Dictionary / て / た', items:[
+    {id:'koto',   lb:'こと (noun)',        en:v=>`${enBase(v)}ing (noun)`, form:'u', cl:'teal'},
+    {id:'no',     lb:'の (noun)',          en:v=>`${enBase(v)}ing (noun)`, form:'u', cl:'teal'},
+    {id:'na',     lb:"don't! (command)",  en:v=>`don't ${enBase(v)}!`, form:'u', cl:'red'},
+    {id:'te',     lb:'て form',            en:v=>`${enBase(v)}! / and...`, form:'te', cl:'yellow'},
+    {id:'ta',     lb:'た form (past)',     en:v=>`did ${enBase(v)} (informal)`, form:'ta', cl:'yellow'},
+  ]});
+
+  return sections;
+}
+
+// ===== CONJUGATION ENGINE =====
+function getConjParts(v, cid) {
+  if(!v) return null;
+  if(v.t==='godan') return partsGodan(v,cid);
+  if(v.t==='ichidan'||v.t==='drilled') return partsIchidan(v,cid);
+  if(v.t==='irregular') return partsIrr(v,cid);
+  return null;
+}
+
+function getFullConj(v,cid) {
+  const p=getConjParts(v,cid);
+  return p ? p.full : null;
+}
+
+function getDisplaySuffix(v, cid) {
+  const p=getConjParts(v,cid);
+  return p ? p.suffix : null;
+}
+
+function partsIchidan(v, cid) {
+  const root=v.r.slice(0,-1); // drop る
+  const suffMap={
+    masu:'ます',mashita:'ました',masen:'ません',msndsh:'ませんでした',
+    mashou:'ましょう',tai:'たい',takatta:'たかった',taknai:'たくない',taknkt:'たくなかった',
+    nai:'ない',nakatta:'なかった',naide:'ないで',
+    // Potential: for drilled verbs, no further potential
+    eru:'られる',enai:'られない',eta:'られた',enkt:'られなかった',
+    emasu:'られます',emshta:'られました',emsn:'られません',emsnds:'られませんでした',
+    // Passive
+    passive:'られる',
+    // Causative
+    causative:'させる',
+    // Causative-passive
+    causepass:'させられる',
+    you:'よう',koto:'ること',no:'るの',na:'るな',te:'て',ta:'た',
+  };
+  const suf=suffMap[cid];
+  if(!suf) return null;
+  const keepRu = cid==='koto'||cid==='no'||cid==='na';
+  const full = keepRu ? v.r+suf.slice(1) : root+suf;
+  return { full, root, stemKana:'', suffix:suf };
+}
+
+function partsGodan(v, cid) {
+  const last=v.r.slice(-1), col=EC[last], root=v.r.slice(0,-1), st=ST[col];
+  if(!st) return null;
+
+  // i-form
+  const iSuf={masu:'ます',mashita:'ました',masen:'ません',msndsh:'ませんでした',
+    mashou:'ましょう',tai:'たい',takatta:'たかった',taknai:'たくない',taknkt:'たくなかった'};
+  if(iSuf[cid]) return { full:root+st.i+iSuf[cid], root, stemKana:st.i, suffix:iSuf[cid] };
+
+  // a-form
+  const aSuf={nai:'ない',nakatta:'なかった',naide:'ないで'};
+  if(aSuf[cid]) return { full:root+st.a+aSuf[cid], root, stemKana:st.a, suffix:aSuf[cid] };
+
+  // Passive: a-form + れる
+  if(cid==='passive') return { full:root+st.a+'れる', root, stemKana:st.a, suffix:'れる' };
+  // Causative: a-form + せる
+  if(cid==='causative') return { full:root+st.a+'せる', root, stemKana:st.a, suffix:'せる' };
+  // Causative-passive: a-form + せられる (or shortened させられる)
+  if(cid==='causepass') return { full:root+st.a+'せられる', root, stemKana:st.a, suffix:'せられる' };
+
+  // e-form (potential) - just the dictionary form る
+  if(cid==='eru') return { full:root+st.e+'る', root, stemKana:st.e, suffix:'る' };
+  // Other e-form conjugations (these are sub-conjugations, shown when not using drill)
+  const eSuf={emasu:'ます',emshta:'ました',emsn:'ません',emsnds:'ませんでした',
+    enai:'ない',eta:'た',enkt:'なかった'};
+  if(eSuf[cid]) return { full:root+st.e+eSuf[cid], root, stemKana:st.e, suffix:eSuf[cid] };
+
+  // o-form
+  if(cid==='you') return { full:root+st.o+'う', root, stemKana:st.o, suffix:'う' };
+
+  // u-form
+  if(cid==='koto') return { full:v.r+'こと', root, stemKana:last, suffix:'こと' };
+  if(cid==='no') return { full:v.r+'の', root, stemKana:last, suffix:'の' };
+  if(cid==='na') return { full:v.r+'な', root, stemKana:last, suffix:'な' };
+
+  // te/ta
+  let te,ta;
+  if(SPEC[v.r]){te=SPEC[v.r].te;ta=SPEC[v.r].ta;}
+  else{const r=TETA[last];te=root+r.te;ta=root+r.ta;}
+  if(cid==='te') {
+    const teSuf = SPEC[v.r] ? SPEC[v.r].te.slice(root.length) : TETA[last].te;
+    return { full:te, root, stemKana:'', suffix:teSuf };
+  }
+  if(cid==='ta') {
+    const taSuf = SPEC[v.r] ? SPEC[v.r].ta.slice(root.length) : TETA[last].ta;
+    return { full:ta, root, stemKana:'', suffix:taSuf };
+  }
+
+  return null;
+}
+
+function partsIrr(v, cid) {
+  let map;
+  if(v.r==='する') map={
+    masu:{sk:'し',sf:'ます'},mashita:{sk:'し',sf:'ました'},masen:{sk:'し',sf:'ません'},msndsh:{sk:'し',sf:'ませんでした'},
+    mashou:{sk:'し',sf:'ましょう'},tai:{sk:'し',sf:'たい'},takatta:{sk:'し',sf:'たかった'},taknai:{sk:'し',sf:'たくない'},taknkt:{sk:'し',sf:'たくなかった'},
+    nai:{sk:'し',sf:'ない'},nakatta:{sk:'し',sf:'なかった'},naide:{sk:'し',sf:'ないで'},
+    eru:{sk:'でき',sf:'る'},enai:{sk:'でき',sf:'ない'},eta:{sk:'でき',sf:'た'},enkt:{sk:'でき',sf:'なかった'},
+    emasu:{sk:'でき',sf:'ます'},emshta:{sk:'でき',sf:'ました'},emsn:{sk:'でき',sf:'ません'},emsnds:{sk:'でき',sf:'ませんでした'},
+    passive:{sk:'さ',sf:'れる'},causative:{sk:'さ',sf:'せる'},causepass:{sk:'さ',sf:'せられる'},
+    you:{sk:'し',sf:'よう'},koto:{sk:'する',sf:'こと'},no:{sk:'する',sf:'の'},na:{sk:'する',sf:'な'},te:{sk:'し',sf:'て'},ta:{sk:'し',sf:'た'},
+  };
+  else if(v.r==='くる') map={
+    masu:{sk:'き',sf:'ます'},mashita:{sk:'き',sf:'ました'},masen:{sk:'き',sf:'ません'},msndsh:{sk:'き',sf:'ませんでした'},
+    mashou:{sk:'き',sf:'ましょう'},tai:{sk:'き',sf:'たい'},takatta:{sk:'き',sf:'たかった'},taknai:{sk:'き',sf:'たくない'},taknkt:{sk:'き',sf:'たくなかった'},
+    nai:{sk:'こ',sf:'ない'},nakatta:{sk:'こ',sf:'なかった'},naide:{sk:'こ',sf:'ないで'},
+    eru:{sk:'こられ',sf:'る'},enai:{sk:'こられ',sf:'ない'},eta:{sk:'こられ',sf:'た'},enkt:{sk:'こられ',sf:'なかった'},
+    emasu:{sk:'こられ',sf:'ます'},emshta:{sk:'こられ',sf:'ました'},emsn:{sk:'こられ',sf:'ません'},emsnds:{sk:'こられ',sf:'ませんでした'},
+    passive:{sk:'こ',sf:'られる'},causative:{sk:'こ',sf:'させる'},causepass:{sk:'こ',sf:'させられる'},
+    you:{sk:'こ',sf:'よう'},koto:{sk:'くる',sf:'こと'},no:{sk:'くる',sf:'の'},na:{sk:'くる',sf:'な'},te:{sk:'き',sf:'て'},ta:{sk:'き',sf:'た'},
+  };
+  if(!map||!map[cid]) return null;
+  const m=map[cid];
+  return { full:m.sk+m.sf, root:'', stemKana:m.sk, suffix:m.sf };
+}
+
+function getAllConjItems() {
+  const all=[];
+  CONJS(drillStack.length>0).forEach(s=>s.items.forEach(i=>all.push(i)));
+  return all;
+}
+
+function getGodanStemKana() {
+  if(!cur||cur.t!=='godan'||!selVowel) return null;
+  const last=cur.r.slice(-1), col=EC[last];
+  return ST[col]?.[selVowel]||null;
+}
+
+// Is a conjugation lit given current state?
+function isLit(form) {
+  if(!cur) return false;
+  if(cur.t==='ichidan'||cur.t==='irregular'||cur.t==='drilled') {
+    if((cur.t==='ichidan'||cur.t==='drilled') && !ruRemoved) {
+      return form==='u'||form==='te'||form==='ta';
+    }
+    return true;
+  }
+  // Godan: u/te/ta only show when no vowel is selected (default state).
+  // Once a specific vowel row is clicked, only that row's forms light up.
+  if(!selVowel) return form==='u'||form==='te'||form==='ta';
+  return form===selVowel;
+}
+
+// ===== DRILL-DOWN =====
+// When user selects a drillable conjugation and the result ends in る,
+// they can click る to "drill in" and treat it as a new ichidan verb.
+
+function getDrillLabel(cid) {
+  const labels = {
+    eru:'potential', passive:'passive', causative:'causative', causepass:'causative-passive'
+  };
+  return labels[cid]||cid;
+}
+
+function getDrillMeaning(baseVerb, cid) {
+  const b = enBase(baseVerb);
+  const meanings = {
+    eru:`to be able to ${b}`,
+    passive:`to be ${b}ed`,
+    causative:`to make/let ${b}`,
+    causepass:`to be made to ${b}`,
+  };
+  return meanings[cid]||baseVerb.m;
+}
+
+function drillInto(cid) {
+  // Get the full conjugated form as the new verb
+  const full = getFullConj(cur, cid);
+  if(!full || !full.endsWith('る')) return;
+
+  // Push current state onto drill stack
+  drillStack.push({
+    verb: cur,
+    conjId: cid,
+    label: getDrillLabel(cid),
+    selVowel: selVowel,
+    ruRemoved: ruRemoved,
+  });
+
+  // Create new "drilled" verb and immediately remove る
+  cur = {
+    k: full,
+    r: full,
+    m: getDrillMeaning(drillStack[0]?.verb || cur, cid),
+    t: 'drilled', // behaves like ichidan
+  };
+  selVowel = null;
+  selConj = null;
+  ruRemoved = true;
+  render();
+}
+
+function drillBack(toIndex) {
+  // Pop back to a specific level in the drill stack
+  if(toIndex < 0 || toIndex >= drillStack.length) {
+    // Go back to base verb
+    const base = drillStack[0];
+    cur = base.verb;
+    selVowel = null;
+    selConj = null;
+    ruRemoved = false;
+    drillStack = [];
+  } else {
+    // Restore to that level
+    const entry = drillStack[toIndex];
+    drillStack = drillStack.slice(0, toIndex);
+    if(drillStack.length === 0) {
+      cur = entry.verb;
+      selVowel = null;
+      selConj = null;
+      ruRemoved = false;
+    } else {
+      // Rebuild the drilled verb at this level
+      const prev = drillStack[drillStack.length-1];
+      const full = getFullConj(prev.verb, prev.conjId);
+      // Actually, simpler: just restore the verb from the entry
+      cur = entry.verb;
+      selVowel = null;
+      selConj = null;
+      ruRemoved = false;
+    }
+  }
+  render();
+}
+
+// ===== RENDERING =====
+function render() {
+  renderTiles();
+  renderInfo();
+  renderChart();
+  renderDrillBar();
+  renderConj();
+  renderBar();
+  renderTypeBtns();
+}
+
+function renderTiles() {
+  const el=document.getElementById('tiles');
+  el.innerHTML='';
+  const N=8;
+  if(!cur) { for(let i=0;i<N;i++){const d=document.createElement('div');d.className='tile-slot';el.appendChild(d);} return; }
+
+  if(selConj && cur) {
+    const parts=getConjParts(cur,selConj);
+    if(parts) {
+      const rootChars=[...parts.root];
+      const stemChars=[...parts.stemKana];
+      const sufChars=[...parts.suffix];
+      const allChars=[...rootChars,...stemChars,...sufChars];
+      const total=Math.max(N,allChars.length);
+
+      // Check if this conjugation is drillable and ends in る
+      const isDrillable = DRILLABLE.has(selConj) && parts.full.endsWith('る') && drillStack.length < 3;
+
+      for(let i=0;i<total;i++) {
+        const d=document.createElement('div');
+        d.className='tile-slot';
+        if(i<allChars.length) {
+          d.textContent=allChars[i];
+          if(i<rootChars.length) {
+            d.classList.add('filled');
+          } else if(i<rootChars.length+stemChars.length) {
+            d.classList.add('stem-new');
+          } else {
+            d.classList.add('conj-part');
+            // If this is the last char and it's る on a drillable form, make it clickable
+            if(isDrillable && i===allChars.length-1 && allChars[i]==='る') {
+              d.classList.remove('conj-part');
+              d.classList.add('ending');
+              d.title='Click to drill deeper into this conjugation';
+              d.onclick=()=>drillInto(selConj);
+            }
+          }
+        }
+        el.appendChild(d);
+      }
+      return;
+    }
+  }
+
+  // Show verb reading with interactive ending
+  const chars=[...cur.r];
+  for(let i=0;i<Math.max(N,chars.length);i++) {
+    const d=document.createElement('div');
+    d.className='tile-slot';
+    if(i<chars.length) {
+      d.textContent=chars[i];
+      d.classList.add('filled');
+      if(i===chars.length-1) {
+        if(cur.t==='godan') {
+          if(selVowel) {
+            const newK=getGodanStemKana();
+            if(newK && selVowel!=='u') {
+              d.textContent=newK;
+              d.classList.add('stem-new');
+              d.classList.remove('filled');
+            } else {
+              d.classList.add('ending');
+            }
+          } else {
+            d.classList.add('ending');
+          }
+        } else if(cur.t==='ichidan'||cur.t==='drilled') {
+          if(ruRemoved) {
+            d.classList.add('removed');
+            d.classList.remove('filled');
+            d.textContent='る';
+            d.style.color='#4a5a6a';
+            d.style.textDecoration='line-through';
+            d.style.cursor='pointer';
+            d.onclick=()=>{ ruRemoved=false; selConj=null; render(); };
+          } else {
+            d.classList.add('ending');
+            d.onclick=()=>{ ruRemoved=true; selConj=null; render(); };
+          }
+        } else {
+          d.classList.add('ending');
+        }
+      }
+    }
+    el.appendChild(d);
+  }
+}
+
+function renderInfo() {
+  const kEl=document.getElementById('vkanji'),mEl=document.getElementById('vmeaning'),tEl=document.getElementById('vtype'),eEl=document.getElementById('venglish');
+  if(!cur){kEl.innerHTML='<span style="color:#556;font-size:13px">Click a verb or press "Get Verb"</span>';mEl.textContent='';tEl.innerHTML='';eEl.textContent='';return;}
+
+  // Show the base verb info, or drilled verb info
+  if(drillStack.length > 0) {
+    const base = drillStack[0].verb;
+    kEl.innerHTML=`<span class="big">${cur.r}</span>`;
+    mEl.textContent=cur.m + ` (from ${base.k})`;
+  } else {
+    kEl.innerHTML=`<span class="big">${cur.k}</span> (${cur.r})`;
+    mEl.textContent=cur.m;
+  }
+
+  const cls=cur.t==='godan'?'godan':(cur.t==='ichidan'||cur.t==='drilled')?'ichidan':'irregular';
+  const txt=cur.t==='godan'?'Regular (Godan / 5-step)':cur.t==='drilled'?'Sub-verb (ichidan-like)':cur.t==='ichidan'?'Iru/Eru (Ichidan / 1-step)':'Irregular';
+  tEl.innerHTML=`<span class="verb-type-badge ${cls}">${txt}</span>`;
+
+  // English translation
+  if(selConj&&cur) {
+    const defs=getAllConjItems();
+    const it=defs.find(x=>x.id===selConj);
+    if(it) eEl.textContent=it.en(cur);
+    else eEl.textContent='';
+  } else {
+    eEl.textContent='';
+  }
+}
+
+function renderDrillBar() {
+  const el=document.getElementById('drillBar');
+  if(drillStack.length === 0) { el.innerHTML=''; return; }
+
+  el.innerHTML='';
+  const bar=document.createElement('div');
+  bar.className='drill-bar';
+
+  // Base verb crumb
+  const baseCrumb=document.createElement('span');
+  baseCrumb.className='crumb';
+  baseCrumb.textContent=drillStack[0].verb.k;
+  baseCrumb.onclick=()=>{ drillBack(-1); };
+  bar.appendChild(baseCrumb);
+
+  // Each drill level
+  drillStack.forEach((entry, i)=>{
+    const arrow=document.createElement('span');
+    arrow.className='arrow';
+    arrow.textContent=' > ';
+    bar.appendChild(arrow);
+
+    const crumb=document.createElement('span');
+    crumb.className='crumb' + (i===drillStack.length-1?' current':'');
+    crumb.textContent=entry.label;
+    if(i<drillStack.length-1) {
+      crumb.onclick=()=>{ drillBack(i+1); };
+    }
+    bar.appendChild(crumb);
+  });
+
+  // Hint
+  const hint=document.createElement('span');
+  hint.className='drill-hint';
+  hint.textContent='click る to go deeper';
+  bar.appendChild(hint);
+
+  el.appendChild(bar);
+}
+
+function renderChart() {
+  const g=document.getElementById('chart');
+  g.innerHTML='';
+  const endCol = cur&&cur.t==='godan' ? EC[cur.r.slice(-1)] : -1;
+
+  ROWS.forEach((row,ri)=>{
+    const lbl=document.createElement('div');
+    lbl.className='row-label';
+    lbl.textContent=row.l;
+    g.appendChild(lbl);
+
+    row.k.forEach((ch,ci)=>{
+      const c=document.createElement('div');
+      c.className='kana-cell';
+      c.textContent=ch;
+      if(!ch){c.classList.add('empty');}
+      else if(cur&&cur.t==='godan'&&ci===endCol) {
+        if(ri===2) {
+          c.classList.add(selVowel==='u'?'active-stem':'verb-ending');
+        } else if(selVowel===row.v) {
+          c.classList.add('active-stem');
+        } else {
+          c.classList.add('col-clickable');
+        }
+        c.onclick=()=>{
+          if(selVowel===row.v) { selVowel=null; }
+          else { selVowel=row.v; }
+          selConj=null;
+          render();
+        };
+      }
+      // Ichidan/drilled/irregular: highlight る (column 8, row 2)
+      else if(cur&&(cur.t==='ichidan'||cur.t==='drilled'||cur.t==='irregular')&&ci===8&&ri===2&&ch==='る') {
+        c.classList.add(ruRemoved?'active-stem':'verb-ending');
+      }
+      g.appendChild(c);
+    });
+  });
+  const el=document.createElement('div');
+  el.className='row-label';
+  g.appendChild(el);
+  EXTRA.forEach(ch=>{
+    const c=document.createElement('div');
+    c.className='kana-cell'+(ch?'':' empty');
+    c.textContent=ch;
+    g.appendChild(c);
+  });
+}
+
+function renderConj() {
+  const p=document.getElementById('conjP');
+  p.innerHTML='';
+  const isDrilled = drillStack.length > 0;
+  const sections=CONJS(isDrilled);
+
+  sections.forEach(sec=>{
+    const h=document.createElement('div');
+    h.className='conj-section-title';
+    h.textContent=sec.sec;
+    p.appendChild(h);
+
+    for(let i=0;i<sec.items.length;i+=4){
+      const chunk=sec.items.slice(i,i+4);
+      const row=document.createElement('div');
+      row.className='conj-row';
+      if(chunk.length===5) row.classList.add('c5');
+      if(chunk.length===3) row.classList.add('c3');
+      if(chunk.length===2) row.classList.add('c2');
+      if(chunk.length===1) row.classList.add('c1');
+
+      chunk.forEach(it=>{
+        const c=document.createElement('div');
+        const lit=isLit(it.form);
+        c.className='cc '+(lit?it.cl+' lit':'off');
+        if(selConj===it.id) c.classList.add('selected');
+
+        if(lit&&cur) {
+          const suf=getDisplaySuffix(cur,it.id);
+          let label = it.lb;
+          if(it.drillable) label += ' [click る to drill]';
+          c.innerHTML=(suf||'—')+`<span class="lb">${label}</span>`;
+          c.onclick=()=>{
+            selConj=selConj===it.id?null:it.id;
+            render();
+          };
+        } else {
+          c.innerHTML=`<span class="lb">${it.lb}</span>`;
+        }
+        row.appendChild(c);
+      });
+      p.appendChild(row);
+    }
+  });
+}
+
+function renderBar() {
+  const bar=document.getElementById('vbar');
+  bar.innerHTML='';
+  const groups=[
+    {label:'Godan (Regular / 5-step)',cls:'godan-label',type:'godan'},
+    {label:'Ichidan (Iru/Eru / 1-step)',cls:'ichidan-label',type:'ichidan'},
+    {label:'Irregular',cls:'irregular-label',type:'irregular'},
+  ];
+  groups.forEach(g=>{
+    const verbs=QBAR.map(kk=>VERBS.find(x=>x.k===kk)).filter(v=>v&&v.t===g.type);
+    if(!verbs.length) return;
+    const grp=document.createElement('div');
+    grp.className='verb-group';
+    const lbl=document.createElement('div');
+    lbl.className='verb-group-label '+g.cls;
+    lbl.textContent=g.label;
+    grp.appendChild(lbl);
+    const chips=document.createElement('div');
+    chips.className='verb-group-chips';
+    verbs.forEach(v=>{
+      const d=document.createElement('div');
+      d.className='vchip '+v.t+(cur&&cur.k===v.k?' on':'');
+      d.innerHTML=`<span class="ck">${v.k}</span><span class="cr">${v.r}</span>`;
+      d.onclick=()=>loadVerb(v);
+      chips.appendChild(d);
+    });
+    grp.appendChild(chips);
+    bar.appendChild(grp);
+  });
+}
+
+function renderTypeBtns() {
+  const g=document.getElementById('tgG'),i=document.getElementById('tgI');
+  g.className='btn-type'+(cur&&cur.t==='godan'?' on-godan':filt==='godan'?' on-godan':'');
+  i.className='btn-type'+(cur&&(cur.t==='ichidan'||cur.t==='irregular')?' on-ichidan':filt==='ichidan'?' on-ichidan':'');
+}
+
+// ===== ACTIONS =====
+function loadVerb(v) {
+  cur=v; selVowel=null; selConj=null; ruRemoved=false; drillStack=[];
+  render();
+}
+function getRandomVerb() {
+  loadVerb(VERBS[Math.floor(Math.random()*VERBS.length)]);
+}
+function clearAll() { cur=null; selVowel=null; selConj=null; ruRemoved=false; drillStack=[]; render(); }
+function filterType(t) {
+  // Load a random verb of that type
+  const pool = t==='ichidan' ? VERBS.filter(v=>v.t==='ichidan'||v.t==='irregular') : VERBS.filter(v=>v.t===t);
+  loadVerb(pool[Math.floor(Math.random()*pool.length)]);
+}
+
+// ===== INIT =====
+render();
+loadVerb(VERBS.find(v=>v.k==='行く'));
+</script>
+</body>
+</html>
