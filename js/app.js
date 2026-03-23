@@ -856,6 +856,10 @@ function drillBack(toIndex) {
     selVowel = null;
     selConj = null;
     endingRemoved = false;
+    // If the last remaining entry in the stack is a て form drill, restore compound mode
+    if(drillStack.length > 0 && drillStack[drillStack.length - 1].conjId === 'te') {
+      teCompoundMode = true;
+    }
   }
   render();
 }
