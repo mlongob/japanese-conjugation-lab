@@ -11,10 +11,15 @@
 <div class="header">
   <div class="cloud"></div><div class="cloud"></div><div class="cloud"></div><div class="cloud"></div>
   <svg viewBox="0 0 400 90" fill="none"><polygon points="200,5 80,90 320,90" fill="#7B9AAF"/><polygon points="200,5 170,28 230,28" fill="#E8EEF4"/><polygon points="170,28 155,40 200,38 245,40 230,28" fill="#D0DAE6" opacity="0.6"/></svg>
-  <div class="header-title"><h1>Japanese Verb Lab</h1><div class="sub">Verb Conjugation Tool</div></div>
+  <div class="header-title"><h1>Japanese Verb Lab</h1><div class="sub">Verb, Adjective & Noun Conjugation</div></div>
   <span class="deco r2">&#x26E9;</span><span class="deco r1">&#x1F3EF;</span>
 </div>
 <div class="app">
+  <div class="tab-bar">
+    <button class="tab active" data-tab="verb" onclick="switchTab('verb')">Verbs</button>
+    <button class="tab" data-tab="adj" onclick="switchTab('adj')">Adjectives</button>
+    <button class="tab" data-tab="noun" onclick="switchTab('noun')">Nouns + Copula</button>
+  </div>
   <div class="top-row">
     <div>
       <div class="tile-slots" id="tiles"></div>
@@ -27,7 +32,7 @@
       <div class="english-line" id="venglish"></div>
     </div>
     <div class="top-row-actions">
-      <button class="btn-sm shuffle" onclick="getRandomVerb()">Surprise me</button>
+      <button class="btn-sm shuffle" onclick="getRandomWord()">Surprise me</button>
       <button class="btn-sm clear" onclick="clearAll()">Clear</button>
     </div>
   </div>
@@ -39,7 +44,7 @@
     </div>
   </div>
   <div class="filter-bar" id="filterBar">
-    <input type="text" id="searchInput" placeholder="Search verbs (kanji, kana, english)..." oninput="onSearchInput()">
+    <input type="text" id="searchInput" placeholder="Search (kanji, kana, english)..." oninput="onSearchInput()">
     <button class="jlpt-btn n5" onclick="toggleJlpt(5)">N5</button>
     <button class="jlpt-btn n4" onclick="toggleJlpt(4)">N4</button>
     <button class="jlpt-btn n3" onclick="toggleJlpt(3)">N3</button>

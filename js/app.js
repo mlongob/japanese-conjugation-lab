@@ -32,7 +32,7 @@ const TETA={
 };
 const SPEC={'いく':{te:'いって',ta:'いった'}};
 
-const VERBS=[
+const WORDS=[
   // === GODAN (regular) ===
   {k:'買う',r:'かう',m:'to buy',t:'godan',jlpt:5},
   {k:'行く',r:'いく',m:'to go, to move (towards)',t:'godan',jlpt:5},
@@ -179,12 +179,73 @@ const VERBS=[
   {k:'怯える',r:'おびえる',m:'to be frightened',t:'ichidan',jlpt:1},
   {k:'衰える',r:'おとろえる',m:'to decline, to weaken',t:'ichidan',jlpt:1},
   {k:'企てる',r:'くわだてる',m:'to plan, to scheme',t:'ichidan',jlpt:1},
+
+  // === I-ADJECTIVES ===
+  {k:'大きい',r:'おおきい',m:'big, large',t:'i-adj',jlpt:5},
+  {k:'小さい',r:'ちいさい',m:'small, little',t:'i-adj',jlpt:5},
+  {k:'高い',r:'たかい',m:'tall, expensive',t:'i-adj',jlpt:5},
+  {k:'安い',r:'やすい',m:'cheap',t:'i-adj',jlpt:5},
+  {k:'新しい',r:'あたらしい',m:'new',t:'i-adj',jlpt:5},
+  {k:'古い',r:'ふるい',m:'old (things)',t:'i-adj',jlpt:5},
+  {k:'暑い',r:'あつい',m:'hot (weather)',t:'i-adj',jlpt:5},
+  {k:'寒い',r:'さむい',m:'cold (weather)',t:'i-adj',jlpt:5},
+  {k:'長い',r:'ながい',m:'long',t:'i-adj',jlpt:5},
+  {k:'短い',r:'みじかい',m:'short',t:'i-adj',jlpt:5},
+  {k:'いい',r:'いい',m:'good',t:'i-adj',jlpt:5,exc:true},
+  {k:'悪い',r:'わるい',m:'bad',t:'i-adj',jlpt:5},
+  {k:'早い',r:'はやい',m:'early, fast',t:'i-adj',jlpt:5},
+  {k:'遅い',r:'おそい',m:'late, slow',t:'i-adj',jlpt:5},
+  {k:'近い',r:'ちかい',m:'near, close',t:'i-adj',jlpt:5},
+  {k:'遠い',r:'とおい',m:'far',t:'i-adj',jlpt:5},
+  {k:'多い',r:'おおい',m:'many, much',t:'i-adj',jlpt:5},
+  {k:'少ない',r:'すくない',m:'few, little',t:'i-adj',jlpt:5},
+  {k:'楽しい',r:'たのしい',m:'fun, enjoyable',t:'i-adj',jlpt:5},
+  {k:'難しい',r:'むずかしい',m:'difficult',t:'i-adj',jlpt:5},
+  {k:'美味しい',r:'おいしい',m:'delicious',t:'i-adj',jlpt:5},
+  {k:'嬉しい',r:'うれしい',m:'happy, glad',t:'i-adj',jlpt:4},
+  {k:'悲しい',r:'かなしい',m:'sad',t:'i-adj',jlpt:4},
+  {k:'厳しい',r:'きびしい',m:'strict, harsh',t:'i-adj',jlpt:4},
+  {k:'眠い',r:'ねむい',m:'sleepy',t:'i-adj',jlpt:4},
+  {k:'痛い',r:'いたい',m:'painful',t:'i-adj',jlpt:4},
+  // === NA-ADJECTIVES ===
+  {k:'元気',r:'げんき',m:'energetic, healthy',t:'na-adj',jlpt:5},
+  {k:'綺麗',r:'きれい',m:'pretty, clean',t:'na-adj',jlpt:5},
+  {k:'静か',r:'しずか',m:'quiet',t:'na-adj',jlpt:5},
+  {k:'好き',r:'すき',m:'liked, favorite',t:'na-adj',jlpt:5},
+  {k:'嫌い',r:'きらい',m:'disliked',t:'na-adj',jlpt:5},
+  {k:'有名',r:'ゆうめい',m:'famous',t:'na-adj',jlpt:4},
+  {k:'大変',r:'たいへん',m:'tough, serious',t:'na-adj',jlpt:4},
+  {k:'簡単',r:'かんたん',m:'easy, simple',t:'na-adj',jlpt:4},
+  {k:'大丈夫',r:'だいじょうぶ',m:'okay, all right',t:'na-adj',jlpt:5},
+  {k:'賑やか',r:'にぎやか',m:'lively, bustling',t:'na-adj',jlpt:4},
+  {k:'丁寧',r:'ていねい',m:'polite, careful',t:'na-adj',jlpt:4},
+  {k:'複雑',r:'ふくざつ',m:'complicated',t:'na-adj',jlpt:4},
+  {k:'不便',r:'ふべん',m:'inconvenient',t:'na-adj',jlpt:4},
+  {k:'安全',r:'あんぜん',m:'safe',t:'na-adj',jlpt:4},
+  {k:'真面目',r:'まじめ',m:'serious, diligent',t:'na-adj',jlpt:4},
+  // === NOUNS (for copula conjugation) ===
+  {k:'学生',r:'がくせい',m:'student',t:'noun',jlpt:5},
+  {k:'先生',r:'せんせい',m:'teacher',t:'noun',jlpt:5},
+  {k:'日本人',r:'にほんじん',m:'Japanese person',t:'noun',jlpt:5},
+  {k:'友達',r:'ともだち',m:'friend',t:'noun',jlpt:5},
+  {k:'猫',r:'ねこ',m:'cat',t:'noun',jlpt:5},
+  {k:'犬',r:'いぬ',m:'dog',t:'noun',jlpt:5},
+  {k:'本',r:'ほん',m:'book',t:'noun',jlpt:5},
+  {k:'水',r:'みず',m:'water',t:'noun',jlpt:5},
+  {k:'大人',r:'おとな',m:'adult',t:'noun',jlpt:4},
+  {k:'子供',r:'こども',m:'child',t:'noun',jlpt:4},
+  {k:'社会人',r:'しゃかいじん',m:'working adult',t:'noun',jlpt:3},
+  {k:'病気',r:'びょうき',m:'illness, sick',t:'noun',jlpt:4},
+  {k:'秘密',r:'ひみつ',m:'secret',t:'noun',jlpt:3},
+  {k:'嘘',r:'うそ',m:'lie',t:'noun',jlpt:4},
+  {k:'本当',r:'ほんとう',m:'truth, reality',t:'noun',jlpt:4},
 ];
 
 // =====================================================================
 // STATE
 // =====================================================================
 
+let activeTab='verb'; // 'verb', 'adj', 'noun'
 let cur=null;       // current verb {k, r, m, t}
 let selVowel=null;  // selected vowel row 'a','i','u','e','o' or null
 let selConj=null;   // selected conjugation id or null
@@ -278,8 +339,70 @@ function CONJS(isDrilled) {
   return sections;
 }
 
+function CONJS_ADJ() {
+  return [
+    {sec:'Present', items:[
+      {id:'adj_pres',     lb:'present (plain)',     en:w=>`is ${w.m}`,           form:'dict', cl:'blue'},
+      {id:'adj_pres_pol', lb:'present (polite)',    en:w=>`is ${w.m} (polite)`,  form:'dict', cl:'blue'},
+    ]},
+    {sec:'Past', items:[
+      {id:'adj_past',     lb:'past (plain)',        en:w=>`was ${w.m}`,           form:'stem', cl:'green'},
+      {id:'adj_past_pol', lb:'past (polite)',       en:w=>`was ${w.m} (polite)`,  form:'stem', cl:'green'},
+    ]},
+    {sec:'Negative', items:[
+      {id:'adj_neg',      lb:'negative (plain)',    en:w=>`is not ${w.m}`,           form:'stem', cl:'red'},
+      {id:'adj_neg_pol',  lb:'negative (polite)',   en:w=>`is not ${w.m} (polite)`,  form:'stem', cl:'red'},
+    ]},
+    {sec:'Past Negative', items:[
+      {id:'adj_pneg',     lb:'past neg (plain)',    en:w=>`was not ${w.m}`,           form:'stem', cl:'orange'},
+      {id:'adj_pneg_pol', lb:'past neg (polite)',   en:w=>`was not ${w.m} (polite)`,  form:'stem', cl:'orange'},
+    ]},
+    {sec:'Te Form / Conditional', items:[
+      {id:'adj_te',       lb:'て form',             en:w=>`${w.m}, and...`,      form:'stem', cl:'yellow'},
+      {id:'adj_ba',       lb:'ば conditional',      en:w=>`if ${w.m}`,           form:'stem', cl:'brown'},
+      {id:'adj_tara',     lb:'たら conditional',    en:w=>`if/when ${w.m}`,      form:'stem', cl:'brown'},
+    ]},
+    {sec:'Adverbial / Attributive', items:[
+      {id:'adj_adv',      lb:'adverbial',           en:w=>`${w.m} (adverb)`,     form:'stem', cl:'teal'},
+      {id:'adj_attr',     lb:'attributive + noun',  en:w=>`${w.m} (before noun)`, form:'dict', cl:'purple'},
+    ]},
+  ];
+}
+
+function CONJS_NOUN() {
+  return [
+    {sec:'Present', items:[
+      {id:'n_pres',     lb:'present (plain)',     en:w=>`is (a) ${w.m}`,           form:'all', cl:'blue'},
+      {id:'n_pres_pol', lb:'present (polite)',    en:w=>`is (a) ${w.m} (polite)`,  form:'all', cl:'blue'},
+    ]},
+    {sec:'Past', items:[
+      {id:'n_past',     lb:'past (plain)',        en:w=>`was (a) ${w.m}`,           form:'all', cl:'green'},
+      {id:'n_past_pol', lb:'past (polite)',       en:w=>`was (a) ${w.m} (polite)`,  form:'all', cl:'green'},
+    ]},
+    {sec:'Negative', items:[
+      {id:'n_neg',      lb:'negative (plain)',    en:w=>`is not (a) ${w.m}`,           form:'all', cl:'red'},
+      {id:'n_neg_pol',  lb:'negative (polite)',   en:w=>`is not (a) ${w.m} (polite)`,  form:'all', cl:'red'},
+    ]},
+    {sec:'Past Negative', items:[
+      {id:'n_pneg',     lb:'past neg (plain)',    en:w=>`was not (a) ${w.m}`,           form:'all', cl:'orange'},
+      {id:'n_pneg_pol', lb:'past neg (polite)',   en:w=>`was not (a) ${w.m} (polite)`,  form:'all', cl:'orange'},
+    ]},
+    {sec:'Te Form / Conditional', items:[
+      {id:'n_te',       lb:'て form',             en:w=>`is (a) ${w.m}, and...`, form:'all', cl:'yellow'},
+      {id:'n_cond',     lb:'なら conditional',    en:w=>`if (a) ${w.m}`,         form:'all', cl:'brown'},
+      {id:'n_tara',     lb:'たら conditional',    en:w=>`if/when was (a) ${w.m}`,form:'all', cl:'brown'},
+    ]},
+    {sec:'Attributive', items:[
+      {id:'n_attr',     lb:'attributive + noun',  en:w=>`${w.m}'s / ${w.m} (before noun)`, form:'all', cl:'purple'},
+    ]},
+  ];
+}
+
 function getConjParts(v, cid) {
   if(!v) return null;
+  if(v.t==='i-adj') return partsIAdj(v,cid);
+  if(v.t==='na-adj') return partsNaAdj(v,cid);
+  if(v.t==='noun') return partsNoun(v,cid);
   if(v.t==='godan') return partsGodan(v,cid);
   if(v.t==='ichidan'||v.t==='drilled') return partsIchidan(v,cid);
   if(v.t==='irregular') return partsIrr(v,cid);
@@ -432,9 +555,80 @@ function partsIrr(v, cid) {
   return null;
 }
 
+function partsIAdj(w, cid) {
+  const isIi = (w.r === 'いい');
+  const root = isIi ? '' : w.r.slice(0, -1);
+  const stem = isIi ? 'よ' : w.r.slice(0, -1);
+  const map = {
+    adj_pres:     { sf: isIi ? 'いい' : 'い', full: isIi ? 'いい' : w.r },
+    adj_pres_pol: { sf: isIi ? 'いいです' : 'いです', full: (isIi ? 'いい' : w.r) + 'です' },
+    adj_past:     { sf: 'かった', full: stem + 'かった' },
+    adj_past_pol: { sf: 'かったです', full: stem + 'かったです' },
+    adj_neg:      { sf: 'くない', full: stem + 'くない' },
+    adj_neg_pol:  { sf: 'くないです', full: stem + 'くないです' },
+    adj_pneg:     { sf: 'くなかった', full: stem + 'くなかった' },
+    adj_pneg_pol: { sf: 'くなかったです', full: stem + 'くなかったです' },
+    adj_te:       { sf: 'くて', full: stem + 'くて' },
+    adj_ba:       { sf: 'ければ', full: stem + 'ければ' },
+    adj_tara:     { sf: 'かったら', full: stem + 'かったら' },
+    adj_adv:      { sf: 'く', full: stem + 'く' },
+    adj_attr:     { sf: isIi ? 'いい' : 'い', full: isIi ? 'いい' : w.r },
+  };
+  const e = map[cid];
+  if (!e) return null;
+  return { full: e.full, root: root, stemKana: isIi ? stem : '', suffix: e.sf };
+}
+
+function partsNaAdj(w, cid) {
+  const stem = w.r;
+  const map = {
+    adj_pres:     { sf: 'だ' },
+    adj_pres_pol: { sf: 'です' },
+    adj_past:     { sf: 'だった' },
+    adj_past_pol: { sf: 'でした' },
+    adj_neg:      { sf: 'じゃない' },
+    adj_neg_pol:  { sf: 'ではありません' },
+    adj_pneg:     { sf: 'じゃなかった' },
+    adj_pneg_pol: { sf: 'ではありませんでした' },
+    adj_te:       { sf: 'で' },
+    adj_ba:       { sf: 'なら(ば)' },
+    adj_tara:     { sf: 'だったら' },
+    adj_adv:      { sf: 'に' },
+    adj_attr:     { sf: 'な' },
+  };
+  const e = map[cid];
+  if (!e) return null;
+  return { full: stem + e.sf, root: stem, stemKana: '', suffix: e.sf };
+}
+
+function partsNoun(w, cid) {
+  const stem = w.r;
+  const map = {
+    n_pres:     { sf: 'だ' },
+    n_pres_pol: { sf: 'です' },
+    n_past:     { sf: 'だった' },
+    n_past_pol: { sf: 'でした' },
+    n_neg:      { sf: 'じゃない' },
+    n_neg_pol:  { sf: 'ではありません' },
+    n_pneg:     { sf: 'じゃなかった' },
+    n_pneg_pol: { sf: 'ではありませんでした' },
+    n_te:       { sf: 'で' },
+    n_cond:     { sf: 'なら' },
+    n_tara:     { sf: 'だったら' },
+    n_attr:     { sf: 'の' },
+  };
+  const e = map[cid];
+  if (!e) return null;
+  return { full: stem + e.sf, root: stem, stemKana: '', suffix: e.sf };
+}
+
 function getAllConjItems() {
   const all=[];
-  CONJS(drillStack.length>0).forEach(s=>s.items.forEach(i=>all.push(i)));
+  let sections;
+  if(cur && (cur.t==='i-adj' || cur.t==='na-adj')) sections = CONJS_ADJ();
+  else if(cur && cur.t==='noun') sections = CONJS_NOUN();
+  else sections = CONJS(drillStack.length>0);
+  sections.forEach(s=>s.items.forEach(i=>all.push(i)));
   return all;
 }
 
@@ -447,6 +641,11 @@ function getGodanStemKana() {
 // Is a conjugation lit given current state?
 function isLit(form) {
   if(!cur) return false;
+  if(cur.t==='i-adj') {
+    if(!ruRemoved) return form==='dict';
+    return true;
+  }
+  if(cur.t==='na-adj' || cur.t==='noun') return true;
   if(cur.t==='ichidan'||cur.t==='irregular'||cur.t==='drilled') {
     if((cur.t==='ichidan'||cur.t==='drilled') && !ruRemoved) {
       return form==='u'||form==='te'||form==='ta';
@@ -483,6 +682,7 @@ function getDrillMeaning(baseVerb, cid) {
 }
 
 function drillInto(cid) {
+  if(cur.t==='i-adj' || cur.t==='na-adj' || cur.t==='noun') return;
   const full = getFullConj(cur, cid);
   if(!full || !full.endsWith('る')) return;
 
@@ -539,6 +739,9 @@ function render() {
   renderBar();
   renderFilterBtns();
   pushState();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === activeTab);
+  });
 }
 
 function renderTiles() {
@@ -605,6 +808,22 @@ function renderTiles() {
           } else {
             d.classList.add('ending');
           }
+        } else if(cur.t==='i-adj') {
+          if(ruRemoved) {
+            d.classList.add('removed');
+            d.classList.remove('filled');
+            d.textContent='い';
+            d.style.color='#4a5a6a';
+            d.style.textDecoration='line-through';
+            d.style.cursor='pointer';
+            d.onclick=()=>{ ruRemoved=false; selConj=null; render(); };
+          } else {
+            d.classList.add('ending');
+            d.classList.add('pulse');
+            d.onclick=()=>{ ruRemoved=true; selConj=null; render(); };
+          }
+        } else if(cur.t==='na-adj' || cur.t==='noun') {
+          // No interactive ending - just filled
         } else if(cur.t==='ichidan'||cur.t==='drilled') {
           if(ruRemoved) {
             d.classList.add('removed');
@@ -634,6 +853,17 @@ function renderHint() {
 
   const isIchi = cur.t==='ichidan'||cur.t==='drilled';
   const isGodan = cur.t==='godan';
+
+  if(cur.t==='i-adj' && !ruRemoved) {
+    el.textContent='Click the い tile to remove it and see conjugations';
+    return;
+  } else if(cur.t==='i-adj' && ruRemoved && !selConj) {
+    el.textContent='Click a conjugation to build the word';
+    return;
+  } else if((cur.t==='na-adj' || cur.t==='noun') && !selConj) {
+    el.textContent='Click a conjugation to build the word';
+    return;
+  }
 
   if(isGodan && !selVowel) {
     el.textContent='Click a kana in the highlighted column to select a form';
@@ -665,7 +895,7 @@ function renderHint() {
 
 function renderInfo() {
   const kEl=document.getElementById('vkanji'),mEl=document.getElementById('vmeaning'),tEl=document.getElementById('vtype'),eEl=document.getElementById('venglish');
-  if(!cur){kEl.innerHTML='<span style="color:#556;font-size:13px">Select a verb below or click "Surprise me"</span>';mEl.textContent='';tEl.innerHTML='';eEl.textContent='';return;}
+  if(!cur){kEl.innerHTML='<span style="color:#556;font-size:13px">Select a word below or click "Surprise me"</span>';mEl.textContent='';tEl.innerHTML='';eEl.textContent='';return;}
 
   if(drillStack.length > 0) {
     const base = drillStack[0].verb;
@@ -676,8 +906,13 @@ function renderInfo() {
     mEl.textContent=cur.m;
   }
 
-  const cls=cur.t==='godan'?'godan':(cur.t==='ichidan'||cur.t==='drilled')?'ichidan':'irregular';
-  const txt=cur.t==='godan'?'Regular (Godan / 5-step)':cur.t==='drilled'?'Sub-verb (ichidan-like)':cur.t==='ichidan'?'Iru/Eru (Ichidan / 1-step)':'Irregular';
+  let cls, txt;
+  if(cur.t==='i-adj') { cls='i-adj'; txt='い-Adjective'; }
+  else if(cur.t==='na-adj') { cls='na-adj'; txt='な-Adjective'; }
+  else if(cur.t==='noun') { cls='noun'; txt='Noun + Copula'; }
+  else if(cur.t==='godan') { cls='godan'; txt='Regular (Godan / 5-step)'; }
+  else if(cur.t==='ichidan'||cur.t==='drilled') { cls='ichidan'; txt=cur.t==='drilled'?'Sub-verb (ichidan-like)':'Iru/Eru (Ichidan / 1-step)'; }
+  else { cls='irregular'; txt='Irregular'; }
   tEl.innerHTML=`<span class="verb-type-badge ${cls}">${txt}</span>`;
 
   if(selConj&&cur) {
@@ -730,6 +965,36 @@ function renderDrillBar() {
 function renderChart() {
   const g=document.getElementById('chart');
   g.innerHTML='';
+
+  // For non-verb tabs, show a reference card instead of the kana chart
+  if(cur && (cur.t==='i-adj' || cur.t==='na-adj' || cur.t==='noun')) {
+    g.style.display='block';
+    let title, stemText, hint;
+    if(cur.t==='i-adj') {
+      const isIi = cur.r==='いい';
+      title = 'い-Adjective';
+      stemText = isIi ? 'Stem: よ (irregular)' : 'Stem: ' + cur.r.slice(0,-1);
+      hint = isIi ? 'Irregular: いい \u2192 よ + endings' : 'Drop い, then add conjugation endings';
+    } else if(cur.t==='na-adj') {
+      title = 'な-Adjective';
+      stemText = 'Stem: ' + cur.r;
+      hint = 'Add copula endings (だ, です, etc.) directly to the stem';
+    } else {
+      title = 'Noun + Copula';
+      stemText = 'Word: ' + cur.r;
+      hint = 'Add copula endings (だ, です, etc.) to express state of being';
+    }
+    g.innerHTML = '<div class="ref-card"><div class="ref-title">' + title + '</div><div class="ref-stem">' + stemText + '</div><div class="ref-hint">' + hint + '</div></div>';
+    return;
+  }
+
+  if(!cur && (activeTab==='adj' || activeTab==='noun')) {
+    g.style.display='block';
+    g.innerHTML = '<div class="ref-card"><div class="ref-hint">Select a word to see conjugation info</div></div>';
+    return;
+  }
+
+  g.style.display='';
   const endCol = cur&&cur.t==='godan' ? EC[cur.r.slice(-1)] : -1;
 
   ROWS.forEach((row,ri)=>{
@@ -780,7 +1045,9 @@ function renderConj() {
   const p=document.getElementById('conjP');
   p.innerHTML='';
   const isDrilled = drillStack.length > 0;
-  const sections=CONJS(isDrilled);
+  const isAdj = cur && (cur.t==='i-adj' || cur.t==='na-adj');
+  const isNoun = cur && cur.t==='noun';
+  const sections = isAdj ? CONJS_ADJ() : isNoun ? CONJS_NOUN() : CONJS(isDrilled);
 
   sections.forEach(sec=>{
     // Check if any item in this section is lit
@@ -859,10 +1126,17 @@ function kanaToRomaji(s) {
 }
 
 // Cache romaji for each verb
-VERBS.forEach(v=>{ v._romaji=kanaToRomaji(v.r); });
+WORDS.forEach(v=>{ v._romaji=kanaToRomaji(v.r); });
 
-function getFilteredVerbs() {
-  return VERBS.filter(v=>{
+function getFilteredWords() {
+  const tabTypes = {
+    verb: ['godan','ichidan','irregular'],
+    adj: ['i-adj','na-adj'],
+    noun: ['noun'],
+  };
+  const allowedTypes = tabTypes[activeTab] || [];
+  return WORDS.filter(v=>{
+    if(!allowedTypes.includes(v.t)) return false;
     // Search filter (supports kanji, kana, romaji, and english)
     if(searchQuery) {
       const q=searchQuery.toLowerCase();
@@ -880,14 +1154,27 @@ function renderBar() {
   const bar=document.getElementById('vbar');
   bar.innerHTML='';
 
-  const filtered = getFilteredVerbs();
+  const filtered = getFilteredWords();
 
-  const groups=[
-    {label:'Godan (Regular / 5-step)',cls:'godan-label',filter:v=>v.t==='godan'&&!v.exc},
-    {label:'Godan Exceptions (iru/eru)',cls:'godan-exc-label',filter:v=>v.t==='godan'&&v.exc},
-    {label:'Ichidan (Iru/Eru / 1-step)',cls:'ichidan-label',filter:v=>v.t==='ichidan'},
-    {label:'Irregular (incl. compound する)',cls:'irregular-label',filter:v=>v.t==='irregular'},
-  ];
+  let groups;
+  if(activeTab==='verb') {
+    groups = [
+      {label:'Godan (Regular / 5-step)',cls:'godan-label',filter:v=>v.t==='godan'&&!v.exc},
+      {label:'Godan Exceptions (iru/eru)',cls:'godan-exc-label',filter:v=>v.t==='godan'&&v.exc},
+      {label:'Ichidan (Iru/Eru / 1-step)',cls:'ichidan-label',filter:v=>v.t==='ichidan'},
+      {label:'Irregular',cls:'irregular-label',filter:v=>v.t==='irregular'},
+    ];
+  } else if(activeTab==='adj') {
+    groups = [
+      {label:'い-Adjectives',cls:'i-adj-label',filter:v=>v.t==='i-adj'&&!v.exc},
+      {label:'い-Adjective Exceptions',cls:'i-adj-label',filter:v=>v.t==='i-adj'&&v.exc},
+      {label:'な-Adjectives',cls:'na-adj-label',filter:v=>v.t==='na-adj'},
+    ];
+  } else {
+    groups = [
+      {label:'Nouns',cls:'noun-label',filter:v=>v.t==='noun'},
+    ];
+  }
 
   groups.forEach(g=>{
     const verbs=filtered.filter(g.filter);
@@ -955,6 +1242,7 @@ function toggleExc() {
 function pushState() {
   if(!cur) { history.replaceState(null,'',location.pathname); return; }
   const p = new URLSearchParams();
+  p.set('tab', activeTab);
   p.set('v', cur.r); // use reading as verb identifier
   if(selVowel) p.set('f', selVowel);
   if(ruRemoved) p.set('ru', '0');
@@ -969,10 +1257,12 @@ function loadFromURL() {
   const hash = location.hash.slice(1);
   if(!hash) return false;
   const p = new URLSearchParams(hash);
+  const tab = p.get('tab');
+  if(tab && ['verb','adj','noun'].includes(tab)) activeTab = tab;
   const reading = p.get('v');
   if(!reading) return false;
 
-  const verb = VERBS.find(v => v.r === reading);
+  const verb = WORDS.find(v => v.r === reading);
   if(!verb) return false;
 
   cur = verb;
@@ -1008,14 +1298,23 @@ function loadFromURL() {
 // ACTIONS
 // =====================================================================
 
+function switchTab(tab) {
+  activeTab = tab;
+  cur = null; selVowel = null; selConj = null; ruRemoved = false; drillStack = [];
+  render();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+}
+
 function loadVerb(v) {
   cur=v; selVowel=null; selConj=null; ruRemoved=false; drillStack=[];
   render();
 }
 
-function getRandomVerb() {
-  const pool = getFilteredVerbs();
-  if(pool.length===0) { loadVerb(VERBS[Math.floor(Math.random()*VERBS.length)]); return; }
+function getRandomWord() {
+  const pool = getFilteredWords();
+  if(pool.length===0) { loadVerb(WORDS[Math.floor(Math.random()*WORDS.length)]); return; }
   loadVerb(pool[Math.floor(Math.random()*pool.length)]);
 }
 
@@ -1026,7 +1325,7 @@ function clearAll() { cur=null; selVowel=null; selConj=null; ruRemoved=false; dr
 // =====================================================================
 
 if(!loadFromURL()) {
-  loadVerb(VERBS.find(v=>v.k==='行く'));
+  loadVerb(WORDS.find(v=>v.k==='行く'));
 } else {
   render();
 }

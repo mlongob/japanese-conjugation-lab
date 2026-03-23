@@ -19,6 +19,21 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
 .header .deco.r1 { right:30px; font-size:30px; }
 .header .deco.r2 { right:100px; font-size:36px; }
 
+/* TAB BAR */
+.tab-bar {
+  display:flex; gap:0; margin-bottom:10px;
+  border-bottom:2px solid #2a3a50;
+}
+.tab {
+  padding:8px 20px; border:none; border-bottom:2px solid transparent;
+  margin-bottom:-2px;
+  background:transparent; color:#667788;
+  font-family:'Nunito',sans-serif; font-weight:800; font-size:13px;
+  cursor:pointer; transition:all 0.15s;
+}
+.tab:hover { color:#aabbcc; }
+.tab.active { color:#f0e070; border-bottom-color:#f0e070; }
+
 /* APP */
 .app { max-width:1200px; margin:0 auto; padding:10px 14px; display:flex; flex-direction:column; gap:10px; }
 
@@ -76,6 +91,9 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
 .verb-type-badge.godan { background:#2a9d5c; color:#fff; }
 .verb-type-badge.ichidan { background:#d03030; color:#fff; }
 .verb-type-badge.irregular { background:#7044aa; color:#fff; }
+.verb-type-badge.i-adj { background:#2878cc; color:#fff; }
+.verb-type-badge.na-adj { background:#cc7818; color:#fff; }
+.verb-type-badge.noun { background:#606878; color:#fff; }
 
 /* CONTROLS - right side of tile row */
 .top-row-actions { display:flex; flex-direction:column; gap:4px; margin-left:auto; }
@@ -224,6 +242,9 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
 .verb-group-label.godan-exc-label { color:#d09030; }
 .verb-group-label.ichidan-label { color:#e04848; }
 .verb-group-label.irregular-label { color:#a060d0; }
+.verb-group-label.i-adj-label { color:#5090d0; }
+.verb-group-label.na-adj-label { color:#d0a040; }
+.verb-group-label.noun-label { color:#9098a8; }
 .verb-group-chips { display:flex; flex-wrap:wrap; gap:4px; }
 .vchip {
   display:flex; flex-direction:column; align-items:center;
@@ -235,6 +256,9 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
 .vchip.godan { background:linear-gradient(180deg,#1a3828,#1c2e22); border-color:#2a6040; }
 .vchip.ichidan { background:linear-gradient(180deg,#381a1a,#2e1c1c); border-color:#6a2a2a; }
 .vchip.irregular { background:linear-gradient(180deg,#2a1a38,#221c2e); border-color:#4a2a6a; }
+.vchip.i-adj { background:linear-gradient(180deg,#1a2838,#1c2230); border-color:#2a5080; }
+.vchip.na-adj { background:linear-gradient(180deg,#382a1a,#2e2218); border-color:#6a5020; }
+.vchip.noun { background:linear-gradient(180deg,#282830,#222228); border-color:#484858; }
 .vchip .ck { font-family:'M PLUS Rounded 1c',sans-serif; font-size:17px; font-weight:800; color:#c0c8d0; }
 .vchip .cr { font-family:'M PLUS Rounded 1c',sans-serif; font-size:10px; color:#667788; }
 
@@ -254,3 +278,15 @@ body { font-family:'Nunito',sans-serif; background:#1e2a3a; color:#fff; min-heig
   display:inline; font-size:9px; font-weight:900;
   color:#e08820; cursor:help; line-height:1;
 }
+
+/* Reference card (adjective/noun left panel) */
+.ref-card {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100%; padding:20px; text-align:center; color:#8899aa;
+}
+.ref-card .ref-title { font-size:18px; font-weight:800; color:#aabbcc; margin-bottom:10px; }
+.ref-card .ref-stem {
+  font-family:'M PLUS Rounded 1c',sans-serif; font-size:28px; font-weight:800;
+  color:#d0d8e0; margin-bottom:8px;
+}
+.ref-card .ref-hint { font-size:12px; font-style:italic; color:#667788; line-height:1.5; }

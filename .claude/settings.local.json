@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.youtube.com)",
+      "WebSearch",
+      "WebFetch(domain:baileysnyder.com)",
+      "WebFetch(domain:noembed.com)",
+      "WebFetch(domain:www.mlcjapanese.co.jp)",
+      "WebFetch(domain:nihongoichiban.com)",
+      "WebFetch(domain:jlptsensei.com)"
+    ]
+  }
+}
