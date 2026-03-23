@@ -293,7 +293,7 @@ let excFilter=false;
 // CONJUGATION ENGINE
 // =====================================================================
 
-const DRILLABLE = new Set(['eru','passive','causative','causepass','teiru','te']);
+const DRILLABLE = new Set(['eru','passive','causative','causepass','teiru','te','adj_sugiru','adj_naru','adj_suru']);
 
 const TE_COMPOUNDS = [
   {id:'te_shimau', suf:'しまう', lb:'てしまう', desc:'completion / regret', en:v=>`end up ${enBase(v)}ing`, drillType:'godan'},
@@ -306,6 +306,8 @@ const TE_COMPOUNDS = [
   {id:'te_kudasai',suf:'ください',lb:'てください',desc:'please do (polite)', en:v=>`please ${enBase(v)}`, drillType:null},
   {id:'te_moii',   suf:'もいい', lb:'てもいい', desc:'permission',         en:v=>`may ${enBase(v)}`, drillType:null},
   {id:'te_ikena',  suf:'はいけない',lb:'てはいけない',desc:'prohibition',  en:v=>`must not ${enBase(v)}`, drillType:null},
+  {id:'te_kuru', suf:'くる', lb:'てくる', desc:'gradual change / coming', en:v=>`${enBase(v)} (coming/gradual)`, drillType:'irregular'},
+  {id:'te_iku',  suf:'いく', lb:'ていく', desc:'going / continuing',     en:v=>`${enBase(v)} (going/ongoing)`,  drillType:'godan'},
 ];
 
 function enBase(v) { return v.m.replace('to ','').replace(/,.*$/,''); }
@@ -329,6 +331,10 @@ function CONJS(isDrilled) {
       {id:'nai',    lb:'informal neg',      en:v=>`won't ${enBase(v)}`, form:'a', cl:'red'},
       {id:'nakatta',lb:'informal past neg', en:v=>`didn't ${enBase(v)}`, form:'a', cl:'red'},
       {id:'naide',  lb:"don't (request)",   en:v=>`don't ${enBase(v)}`, form:'a', cl:'red'},
+      {id:'nakute', lb:'なくて (neg て)',    en:v=>`without ${enBase(v)}ing`, form:'a', cl:'red'},
+    ]},
+    {sec:'Obligation', items:[
+      {id:'nakereba', lb:'なければならない (must)', en:v=>`must ${enBase(v)}`, form:'a', cl:'brown'},
     ]},
   ];
 
@@ -374,6 +380,7 @@ function CONJS(isDrilled) {
   sections.push({sec:'Dictionary / て / た', items:[
     {id:'koto',   lb:'こと (noun)',        en:v=>`${enBase(v)}ing (noun)`, form:'u', cl:'teal'},
     {id:'no',     lb:'の (noun)',          en:v=>`${enBase(v)}ing (noun)`, form:'u', cl:'teal'},
+    {id:'kotogadekiru', lb:'ことができる (can)', en:v=>`can ${enBase(v)}`, form:'u', cl:'teal'},
     {id:'na',     lb:"don't! (command)",  en:v=>`don't ${enBase(v)}!`, form:'u', cl:'red'},
     {id:'te',     lb:'て form [expand]',   en:v=>`${enBase(v)}! / and...`, form:'te', cl:'yellow', drillable:true},
     {id:'ta',     lb:'た form (past)',     en:v=>`did ${enBase(v)} (informal)`, form:'ta', cl:'yellow'},
@@ -409,6 +416,16 @@ function CONJS_ADJ() {
       {id:'adj_adv',      lb:'adverbial',           en:w=>`${w.m} (adverb)`,     form:'stem', cl:'teal'},
       {id:'adj_attr',     lb:'attributive + noun',  en:w=>`${w.m} (before noun)`, form:'dict', cl:'purple'},
     ]},
+    {sec:'Degree / Transformation -- drillable', items:[
+      {id:'adj_sugiru', lb:'すぎる (too much)', en:w=>`too ${w.m}`, form:'stem', cl:'orange', drillable:true, drillType:'ichidan'},
+      {id:'adj_naru',   lb:'なる (become)',     en:w=>`become ${w.m}`, form:'stem', cl:'teal', drillable:true, drillType:'godan'},
+      {id:'adj_suru',   lb:'する (make)',       en:w=>`make ${w.m}`, form:'stem', cl:'teal', drillable:true, drillType:'irregular'},
+      {id:'adj_sou',    lb:'そう (looks like)', en:w=>`looks ${w.m}`, form:'stem', cl:'purple'},
+    ]},
+    {sec:'Probability', items:[
+      {id:'adj_darou',  lb:'だろう (probably)',    en:w=>`is probably ${w.m}`, form:'stem', cl:'purple'},
+      {id:'adj_deshou', lb:'でしょう (probably)',  en:w=>`is probably ${w.m} (polite)`, form:'stem', cl:'purple'},
+    ]},
   ];
 }
 
@@ -437,6 +454,10 @@ function CONJS_NOUN() {
     ]},
     {sec:'Attributive', items:[
       {id:'n_attr',     lb:'attributive + noun',  en:w=>`${w.m}'s / ${w.m} (before noun)`, form:'all', cl:'purple'},
+    ]},
+    {sec:'Probability', items:[
+      {id:'n_darou',    lb:'だろう (probably, plain)',    en:w=>`is probably (a) ${w.m}`,          form:'all', cl:'purple'},
+      {id:'n_deshou',   lb:'でしょう (probably, polite)', en:w=>`is probably (a) ${w.m} (polite)`, form:'all', cl:'purple'},
     ]},
   ];
 }
@@ -467,12 +488,15 @@ function partsIchidan(v, cid) {
   const suffMap={
     masu:'ます',mashita:'ました',masen:'ません',msndsh:'ませんでした',
     mashou:'ましょう',tai:'たい',takatta:'たかった',taknai:'たくない',taknkt:'たくなかった',
-    nai:'ない',nakatta:'なかった',naide:'ないで',
+    nai:'ない',nakatta:'なかった',naide:'ないで',nakute:'なくて',
+    nakereba:'なければならない',
     eru:'られる',
     passive:'られる',
     causative:'させる',
     causepass:'させられる',
-    you:'よう',koto:'ること',no:'るの',na:'るな',te:'て',ta:'た',
+    you:'よう',koto:'ること',no:'るの',na:'るな',
+    kotogadekiru:'ることができる',
+    te:'て',ta:'た',
     cond:'れば',
     tara:'たら',
     teiru:'ている',
@@ -480,7 +504,7 @@ function partsIchidan(v, cid) {
   };
   const suf=suffMap[cid];
   if(!suf) return null;
-  const keepRu = cid==='koto'||cid==='no'||cid==='na';
+  const keepRu = cid==='koto'||cid==='no'||cid==='na'||cid==='kotogadekiru';
   const full = keepRu ? v.r+suf.slice(1) : root+suf;
   return { full, root, stemKana:'', suffix:suf };
 }
@@ -495,8 +519,9 @@ function partsGodan(v, cid) {
   if(iSuf[cid]) return { full:root+st.i+iSuf[cid], root, stemKana:st.i, suffix:iSuf[cid] };
 
   // a-form
-  const aSuf={nai:'ない',nakatta:'なかった',naide:'ないで'};
+  const aSuf={nai:'ない',nakatta:'なかった',naide:'ないで',nakute:'なくて'};
   if(aSuf[cid]) return { full:root+st.a+aSuf[cid], root, stemKana:st.a, suffix:aSuf[cid] };
+  if(cid==='nakereba') return { full:root+st.a+'なければならない', root, stemKana:st.a, suffix:'なければならない' };
 
   // Passive: a-form + れる
   if(cid==='passive') return { full:root+st.a+'れる', root, stemKana:st.a, suffix:'れる' };
@@ -520,6 +545,7 @@ function partsGodan(v, cid) {
   // u-form
   if(cid==='koto') return { full:v.r+'こと', root, stemKana:last, suffix:'こと' };
   if(cid==='no') return { full:v.r+'の', root, stemKana:last, suffix:'の' };
+  if(cid==='kotogadekiru') return { full:v.r+'ことができる', root, stemKana:last, suffix:'ことができる' };
   if(cid==='na') return { full:v.r+'な', root, stemKana:last, suffix:'な' };
 
   // te/ta
@@ -558,17 +584,20 @@ function partsGodan(v, cid) {
 
 function partsIrr(v, cid) {
   const isSuru = v.r.endsWith('する');
-  const isKuru = v.r === 'くる';
+  const isKuru = v.r.endsWith('くる');
 
   if(isSuru) {
     const prefix = v.r.slice(0, -2);
     const baseMap={
       masu:{sk:'し',sf:'ます'},mashita:{sk:'し',sf:'ました'},masen:{sk:'し',sf:'ません'},msndsh:{sk:'し',sf:'ませんでした'},
       mashou:{sk:'し',sf:'ましょう'},tai:{sk:'し',sf:'たい'},takatta:{sk:'し',sf:'たかった'},taknai:{sk:'し',sf:'たくない'},taknkt:{sk:'し',sf:'たくなかった'},
-      nai:{sk:'し',sf:'ない'},nakatta:{sk:'し',sf:'なかった'},naide:{sk:'し',sf:'ないで'},
+      nai:{sk:'し',sf:'ない'},nakatta:{sk:'し',sf:'なかった'},naide:{sk:'し',sf:'ないで'},nakute:{sk:'し',sf:'なくて'},
+      nakereba:{sk:'し',sf:'なければならない'},
       eru:{sk:'でき',sf:'る'},
       passive:{sk:'さ',sf:'れる'},causative:{sk:'さ',sf:'せる'},causepass:{sk:'さ',sf:'せられる'},
-      you:{sk:'し',sf:'よう'},koto:{sk:'する',sf:'こと'},no:{sk:'する',sf:'の'},na:{sk:'する',sf:'な'},te:{sk:'し',sf:'て'},ta:{sk:'し',sf:'た'},
+      you:{sk:'し',sf:'よう'},koto:{sk:'する',sf:'こと'},no:{sk:'する',sf:'の'},na:{sk:'する',sf:'な'},
+      kotogadekiru:{sk:'する',sf:'ことができる'},
+      te:{sk:'し',sf:'て'},ta:{sk:'し',sf:'た'},
       cond:{sk:'す',sf:'れば'},
       tara:{sk:'し',sf:'たら'},
       teiru:{sk:'し',sf:'ている'},
@@ -579,13 +608,17 @@ function partsIrr(v, cid) {
     const sk = prefix + b.sk;
     return { full:sk+b.sf, root:'', stemKana:sk, suffix:b.sf };
   } else if(isKuru) {
+    const prefix = v.r.slice(0, -2);
     const map={
       masu:{sk:'き',sf:'ます'},mashita:{sk:'き',sf:'ました'},masen:{sk:'き',sf:'ません'},msndsh:{sk:'き',sf:'ませんでした'},
       mashou:{sk:'き',sf:'ましょう'},tai:{sk:'き',sf:'たい'},takatta:{sk:'き',sf:'たかった'},taknai:{sk:'き',sf:'たくない'},taknkt:{sk:'き',sf:'たくなかった'},
-      nai:{sk:'こ',sf:'ない'},nakatta:{sk:'こ',sf:'なかった'},naide:{sk:'こ',sf:'ないで'},
+      nai:{sk:'こ',sf:'ない'},nakatta:{sk:'こ',sf:'なかった'},naide:{sk:'こ',sf:'ないで'},nakute:{sk:'こ',sf:'なくて'},
+      nakereba:{sk:'こ',sf:'なければならない'},
       eru:{sk:'こられ',sf:'る'},
       passive:{sk:'こ',sf:'られる'},causative:{sk:'こ',sf:'させる'},causepass:{sk:'こ',sf:'させられる'},
-      you:{sk:'こ',sf:'よう'},koto:{sk:'くる',sf:'こと'},no:{sk:'くる',sf:'の'},na:{sk:'くる',sf:'な'},te:{sk:'き',sf:'て'},ta:{sk:'き',sf:'た'},
+      you:{sk:'こ',sf:'よう'},koto:{sk:'くる',sf:'こと'},no:{sk:'くる',sf:'の'},na:{sk:'くる',sf:'な'},
+      kotogadekiru:{sk:'くる',sf:'ことができる'},
+      te:{sk:'き',sf:'て'},ta:{sk:'き',sf:'た'},
       cond:{sk:'く',sf:'れば'},
       tara:{sk:'き',sf:'たら'},
       teiru:{sk:'き',sf:'ている'},
@@ -593,7 +626,8 @@ function partsIrr(v, cid) {
     };
     if(!map[cid]) return null;
     const m=map[cid];
-    return { full:m.sk+m.sf, root:'', stemKana:m.sk, suffix:m.sf };
+    const sk = prefix + m.sk;
+    return { full:sk+m.sf, root:prefix, stemKana:m.sk, suffix:m.sf };
   } else if(v.r.endsWith('ある')) {
     // ある is irregular: negative is ない (not あらない)
     // No potential, passive, causative, causative-passive, or imperative forms
@@ -605,7 +639,8 @@ function partsIrr(v, cid) {
       mashou:{sk:'あり',sf:'ましょう'},
       tai:{sk:'あり',sf:'たい'},takatta:{sk:'あり',sf:'たかった'},
       taknai:{sk:'あり',sf:'たくない'},taknkt:{sk:'あり',sf:'たくなかった'},
-      nai:{sk:'',sf:'ない'},nakatta:{sk:'',sf:'なかった'},naide:{sk:'',sf:'ないで'},
+      nai:{sk:'',sf:'ない'},nakatta:{sk:'',sf:'なかった'},naide:{sk:'',sf:'ないで'},nakute:{sk:'',sf:'なくて'},
+      nakereba:{sk:'',sf:'なければならない'},
       you:{sk:'あろ',sf:'う'},
       koto:{sk:'ある',sf:'こと'},no:{sk:'ある',sf:'の'},
       te:{sk:'あっ',sf:'て'},ta:{sk:'あっ',sf:'た'},
@@ -624,14 +659,20 @@ function partsIAdj(w, cid) {
   const stem = isIi ? 'よ' : w.r.slice(0, -1);
 
   // Dictionary forms use the original word, not the よ stem
-  if(isIi && (cid==='adj_pres' || cid==='adj_pres_pol' || cid==='adj_attr')) {
+  if(isIi && (cid==='adj_pres' || cid==='adj_pres_pol' || cid==='adj_attr' || cid==='adj_darou' || cid==='adj_deshou')) {
     const map = {
-      adj_pres:     { sf:'いい',     full:'いい' },
-      adj_pres_pol: { sf:'いいです', full:'いいです' },
-      adj_attr:     { sf:'いい',     full:'いい' },
+      adj_pres:     { sf:'いい',       full:'いい' },
+      adj_pres_pol: { sf:'いいです',   full:'いいです' },
+      adj_attr:     { sf:'いい',       full:'いい' },
+      adj_darou:    { sf:'だろう',     full:'いいだろう' },
+      adj_deshou:   { sf:'でしょう',   full:'いいでしょう' },
     };
     const e = map[cid];
     return { full:e.full, root:'', stemKana:'', suffix:e.sf };
+  }
+  // いい irregular: adj_sou uses よさそう
+  if(isIi && cid==='adj_sou') {
+    return { full:'よさそう', root:'', stemKana:'よさ', suffix:'そう' };
   }
 
   const map = {
@@ -648,6 +689,12 @@ function partsIAdj(w, cid) {
     adj_tara:     { sf:'かったら',     full:stem+'かったら' },
     adj_adv:      { sf:'く',           full:stem+'く' },
     adj_attr:     { sf:'い',           full:w.r },
+    adj_sugiru:   { sf:'すぎる',       full:stem+'すぎる' },
+    adj_naru:     { sf:'くなる',       full:stem+'くなる' },
+    adj_suru:     { sf:'くする',       full:stem+'くする' },
+    adj_sou:      { sf:'そう',         full:stem+'そう' },
+    adj_darou:    { sf:'だろう',       full:w.r+'だろう' },
+    adj_deshou:   { sf:'でしょう',     full:w.r+'でしょう' },
   };
   const e = map[cid];
   if(!e) return null;
@@ -670,6 +717,12 @@ function partsNaAdj(w, cid) {
     adj_tara:     { sf: 'だったら' },
     adj_adv:      { sf: 'に' },
     adj_attr:     { sf: 'な' },
+    adj_sugiru:   { sf: 'すぎる' },
+    adj_naru:     { sf: 'になる' },
+    adj_suru:     { sf: 'にする' },
+    adj_sou:      { sf: 'そう' },
+    adj_darou:    { sf: 'だろう' },
+    adj_deshou:   { sf: 'でしょう' },
   };
   const e = map[cid];
   if (!e) return null;
@@ -691,6 +744,8 @@ function partsNoun(w, cid) {
     n_cond:     { sf: 'なら' },
     n_tara:     { sf: 'だったら' },
     n_attr:     { sf: 'の' },
+    n_darou:    { sf: 'だろう' },
+    n_deshou:   { sf: 'でしょう' },
   };
   const e = map[cid];
   if (!e) return null;
@@ -739,7 +794,8 @@ function isLit(form) {
 function getDrillLabel(cid) {
   const labels = {
     eru:'potential', passive:'passive', causative:'causative', causepass:'causative-passive',
-    teiru:'progressive', te:'て form'
+    teiru:'progressive', te:'て form',
+    adj_sugiru:'すぎる (too much)', adj_naru:'なる (become)', adj_suru:'する (make)',
   };
   if (labels[cid]) return labels[cid];
   const tc = TE_COMPOUNDS.find(c => c.id === cid);
@@ -756,6 +812,9 @@ function getDrillMeaning(baseVerb, cid) {
     causepass:`to be made to ${b}`,
     teiru:`to be ${b}ing`,
     te:`${baseVerb.m} (て form)`,
+    adj_sugiru:`to be too ${baseVerb.m}`,
+    adj_naru:`to become ${baseVerb.m}`,
+    adj_suru:`to make ${baseVerb.m}`,
   };
   if (meanings[cid]) return meanings[cid];
   // Check TE_COMPOUNDS
@@ -765,7 +824,8 @@ function getDrillMeaning(baseVerb, cid) {
 }
 
 function drillInto(cid) {
-  if(cur.t==='i-adj' || cur.t==='na-adj' || cur.t==='noun') return;
+  // Allow adjective drillable forms
+  if((cur.t==='i-adj' || cur.t==='na-adj' || cur.t==='noun') && !cid.startsWith('adj_')) return;
 
   if(cid === 'te') {
     // て form opens compound selection panel
@@ -781,6 +841,16 @@ function drillInto(cid) {
   const full = getFullConj(cur, cid);
   if(!full || !full.endsWith('る')) return;
 
+  // Determine drill type from conjugation item if specified
+  const allItems = getAllConjItems();
+  const conjItem = allItems.find(x => x.id === cid);
+  const drillType = conjItem?.drillType;
+
+  let newType;
+  if(drillType === 'ichidan' || !drillType) newType = 'drilled';
+  else if(drillType === 'godan') newType = 'godan';
+  else newType = drillType; // 'irregular' etc.
+
   drillStack.push({
     verb: cur,
     conjId: cid,
@@ -793,11 +863,11 @@ function drillInto(cid) {
     k: full,
     r: full,
     m: getDrillMeaning(drillStack[0]?.verb || cur, cid),
-    t: 'drilled',
+    t: newType,
   };
   selVowel = null;
   selConj = null;
-  endingRemoved = true;
+  endingRemoved = (newType === 'drilled');
   render();
 }
 
@@ -1611,12 +1681,20 @@ function loadFromURL() {
       }
       const full = getFullConj(cur, cid);
       if(!full || !full.endsWith('る')) break;
+      // Determine drill type from conjugation item
+      const allCI = getAllConjItems();
+      const cItem = allCI.find(x => x.id === cid);
+      const dType = cItem?.drillType;
+      let replayType;
+      if(dType === 'ichidan' || !dType) replayType = 'drilled';
+      else if(dType === 'godan') replayType = 'godan';
+      else replayType = dType;
       drillStack.push({
         verb: cur, conjId: cid,
         label: getDrillLabel(cid),
         selVowel: null, endingRemoved: false,
       });
-      cur = { k: full, r: full, m: getDrillMeaning(drillStack[0].verb, cid), t: 'drilled' };
+      cur = { k: full, r: full, m: getDrillMeaning(drillStack[0].verb, cid), t: replayType };
     }
   }
 
