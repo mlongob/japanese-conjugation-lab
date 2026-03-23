@@ -747,8 +747,15 @@ function render() {
 function renderTiles() {
   const el=document.getElementById('tiles');
   el.innerHTML='';
+  el.className='tile-slots';
   const N=8;
   if(!cur) { for(let i=0;i<N;i++){const d=document.createElement('div');d.className='tile-slot';el.appendChild(d);} return; }
+
+  // Compact tiles for long conjugated forms
+  let charCount = [...cur.r].length;
+  if(selConj) { const p=getConjParts(cur,selConj); if(p) charCount=[...p.full].length; }
+  if(charCount > 10) el.classList.add('very-compact');
+  else if(charCount > 7) el.classList.add('compact');
 
   if(selConj && cur) {
     const parts=getConjParts(cur,selConj);
