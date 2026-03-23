@@ -77,6 +77,13 @@ const WORDS=[
   {k:'住む',r:'すむ',m:'to live, to reside',t:'godan',jlpt:4},
   {k:'着く',r:'つく',m:'to arrive',t:'godan',jlpt:4},
   {k:'飛ぶ',r:'とぶ',m:'to fly, to jump',t:'godan',jlpt:4},
+  {k:'なる',r:'なる',m:'to become',t:'godan',jlpt:4},
+  {k:'もらう',r:'もらう',m:'to receive',t:'godan',jlpt:4},
+  {k:'やる',r:'やる',m:'to do (casual)',t:'godan',jlpt:4},
+  {k:'押す',r:'おす',m:'to push, to press',t:'godan',jlpt:4},
+  {k:'引く',r:'ひく',m:'to pull, to draw',t:'godan',jlpt:4},
+  {k:'消す',r:'けす',m:'to erase, to turn off',t:'godan',jlpt:4},
+  {k:'貸す',r:'かす',m:'to lend',t:'godan',jlpt:4},
 
   // === GODAN EXCEPTIONS (iru/eru ending but godan) ===
   {k:'要る',r:'いる',m:'to need',t:'godan',jlpt:3,exc:true},
@@ -126,10 +133,14 @@ const WORDS=[
   {k:'疲れる',r:'つかれる',m:'to get tired',t:'ichidan',jlpt:4},
   {k:'落ちる',r:'おちる',m:'to fall',t:'ichidan',jlpt:4},
   {k:'決める',r:'きめる',m:'to decide',t:'ichidan',jlpt:3},
+  {k:'できる',r:'できる',m:'to be able to, to be ready',t:'ichidan',jlpt:4},
+  {k:'くれる',r:'くれる',m:'to give (to me)',t:'ichidan',jlpt:4},
+  {k:'つける',r:'つける',m:'to turn on, to attach',t:'ichidan',jlpt:4},
 
   // === IRREGULAR ===
   {k:'する',r:'する',m:'to do',t:'irregular',jlpt:5},
   {k:'来る',r:'くる',m:'to come',t:'irregular',jlpt:5},
+  {k:'ある',r:'ある',m:'to exist, to be (inanimate)',t:'irregular',jlpt:5},
   // Compound suru verbs
   {k:'勉強する',r:'べんきょうする',m:'to study',t:'irregular',jlpt:5},
   {k:'運動する',r:'うんどうする',m:'to exercise',t:'irregular',jlpt:4},
@@ -207,6 +218,18 @@ const WORDS=[
   {k:'厳しい',r:'きびしい',m:'strict, harsh',t:'i-adj',jlpt:4},
   {k:'眠い',r:'ねむい',m:'sleepy',t:'i-adj',jlpt:4},
   {k:'痛い',r:'いたい',m:'painful',t:'i-adj',jlpt:4},
+  {k:'白い',r:'しろい',m:'white',t:'i-adj',jlpt:5},
+  {k:'黒い',r:'くろい',m:'black',t:'i-adj',jlpt:5},
+  {k:'赤い',r:'あかい',m:'red',t:'i-adj',jlpt:5},
+  {k:'青い',r:'あおい',m:'blue',t:'i-adj',jlpt:5},
+  {k:'強い',r:'つよい',m:'strong',t:'i-adj',jlpt:4},
+  {k:'弱い',r:'よわい',m:'weak',t:'i-adj',jlpt:4},
+  {k:'若い',r:'わかい',m:'young',t:'i-adj',jlpt:4},
+  {k:'広い',r:'ひろい',m:'wide, spacious',t:'i-adj',jlpt:4},
+  {k:'狭い',r:'せまい',m:'narrow, cramped',t:'i-adj',jlpt:4},
+  {k:'忙しい',r:'いそがしい',m:'busy',t:'i-adj',jlpt:5},
+  {k:'優しい',r:'やさしい',m:'kind, gentle',t:'i-adj',jlpt:4},
+  {k:'危ない',r:'あぶない',m:'dangerous',t:'i-adj',jlpt:4},
   // === NA-ADJECTIVES ===
   {k:'元気',r:'げんき',m:'energetic, healthy',t:'na-adj',jlpt:5},
   {k:'綺麗',r:'きれい',m:'pretty, clean',t:'na-adj',jlpt:5},
@@ -223,6 +246,12 @@ const WORDS=[
   {k:'不便',r:'ふべん',m:'inconvenient',t:'na-adj',jlpt:4},
   {k:'安全',r:'あんぜん',m:'safe',t:'na-adj',jlpt:4},
   {k:'真面目',r:'まじめ',m:'serious, diligent',t:'na-adj',jlpt:4},
+  {k:'便利',r:'べんり',m:'convenient',t:'na-adj',jlpt:4},
+  {k:'上手',r:'じょうず',m:'skillful, good at',t:'na-adj',jlpt:5},
+  {k:'下手',r:'へた',m:'unskillful, bad at',t:'na-adj',jlpt:5},
+  {k:'暇',r:'ひま',m:'free (time), not busy',t:'na-adj',jlpt:4},
+  {k:'特別',r:'とくべつ',m:'special',t:'na-adj',jlpt:3},
+  {k:'必要',r:'ひつよう',m:'necessary',t:'na-adj',jlpt:3},
   // === NOUNS (for copula conjugation) ===
   {k:'学生',r:'がくせい',m:'student',t:'noun',jlpt:5},
   {k:'先生',r:'せんせい',m:'teacher',t:'noun',jlpt:5},
@@ -249,7 +278,7 @@ let activeTab='verb'; // 'verb', 'adj', 'noun'
 let cur=null;       // current verb {k, r, m, t}
 let selVowel=null;  // selected vowel row 'a','i','u','e','o' or null
 let selConj=null;   // selected conjugation id or null
-let ruRemoved=false; // for ichidan: has る been removed?
+let endingRemoved=false; // for ichidan: has る been removed?
 
 // Drill-down stack
 let drillStack=[];
@@ -551,6 +580,23 @@ function partsIrr(v, cid) {
     if(!map[cid]) return null;
     const m=map[cid];
     return { full:m.sk+m.sf, root:'', stemKana:m.sk, suffix:m.sf };
+  } else if(v.r==='ある') {
+    const base = {
+      masu:{sk:'あり',sf:'ます'},mashita:{sk:'あり',sf:'ました'},
+      masen:{sk:'あり',sf:'ません'},msndsh:{sk:'あり',sf:'ませんでした'},
+      mashou:{sk:'あり',sf:'ましょう'},
+      tai:{sk:'あり',sf:'たい'},takatta:{sk:'あり',sf:'たかった'},
+      taknai:{sk:'あり',sf:'たくない'},taknkt:{sk:'あり',sf:'たくなかった'},
+      nai:{sk:'',sf:'ない'},nakatta:{sk:'',sf:'なかった'},naide:{sk:'',sf:'ないで'},
+      you:{sk:'あろ',sf:'う'},
+      koto:{sk:'ある',sf:'こと'},no:{sk:'ある',sf:'の'},na:{sk:'ある',sf:'な'},
+      te:{sk:'あっ',sf:'て'},ta:{sk:'あっ',sf:'た'},
+      cond:{sk:'あれ',sf:'ば'},tara:{sk:'あっ',sf:'たら'},teiru:{sk:'あっ',sf:'ている'},
+      imperative:{sk:'あ',sf:'れ'},
+    };
+    if(!base[cid]) return null;
+    const m=base[cid];
+    return { full:m.sk+m.sf, root:'', stemKana:m.sk, suffix:m.sf };
   }
   return null;
 }
@@ -559,24 +605,36 @@ function partsIAdj(w, cid) {
   const isIi = (w.r === 'いい');
   const root = isIi ? '' : w.r.slice(0, -1);
   const stem = isIi ? 'よ' : w.r.slice(0, -1);
+
+  // Dictionary forms use the original word, not the よ stem
+  if(isIi && (cid==='adj_pres' || cid==='adj_pres_pol' || cid==='adj_attr')) {
+    const map = {
+      adj_pres:     { sf:'いい',     full:'いい' },
+      adj_pres_pol: { sf:'いいです', full:'いいです' },
+      adj_attr:     { sf:'いい',     full:'いい' },
+    };
+    const e = map[cid];
+    return { full:e.full, root:'', stemKana:'', suffix:e.sf };
+  }
+
   const map = {
-    adj_pres:     { sf: isIi ? 'いい' : 'い', full: isIi ? 'いい' : w.r },
-    adj_pres_pol: { sf: isIi ? 'いいです' : 'いです', full: (isIi ? 'いい' : w.r) + 'です' },
-    adj_past:     { sf: 'かった', full: stem + 'かった' },
-    adj_past_pol: { sf: 'かったです', full: stem + 'かったです' },
-    adj_neg:      { sf: 'くない', full: stem + 'くない' },
-    adj_neg_pol:  { sf: 'くないです', full: stem + 'くないです' },
-    adj_pneg:     { sf: 'くなかった', full: stem + 'くなかった' },
-    adj_pneg_pol: { sf: 'くなかったです', full: stem + 'くなかったです' },
-    adj_te:       { sf: 'くて', full: stem + 'くて' },
-    adj_ba:       { sf: 'ければ', full: stem + 'ければ' },
-    adj_tara:     { sf: 'かったら', full: stem + 'かったら' },
-    adj_adv:      { sf: 'く', full: stem + 'く' },
-    adj_attr:     { sf: isIi ? 'いい' : 'い', full: isIi ? 'いい' : w.r },
+    adj_pres:     { sf:'い',           full:w.r },
+    adj_pres_pol: { sf:'いです',       full:w.r+'です' },
+    adj_past:     { sf:'かった',       full:stem+'かった' },
+    adj_past_pol: { sf:'かったです',   full:stem+'かったです' },
+    adj_neg:      { sf:'くない',       full:stem+'くない' },
+    adj_neg_pol:  { sf:'くないです',   full:stem+'くないです' },
+    adj_pneg:     { sf:'くなかった',   full:stem+'くなかった' },
+    adj_pneg_pol: { sf:'くなかったです',full:stem+'くなかったです' },
+    adj_te:       { sf:'くて',         full:stem+'くて' },
+    adj_ba:       { sf:'ければ',       full:stem+'ければ' },
+    adj_tara:     { sf:'かったら',     full:stem+'かったら' },
+    adj_adv:      { sf:'く',           full:stem+'く' },
+    adj_attr:     { sf:'い',           full:w.r },
   };
   const e = map[cid];
-  if (!e) return null;
-  return { full: e.full, root: root, stemKana: isIi ? stem : '', suffix: e.sf };
+  if(!e) return null;
+  return { full:e.full, root:root, stemKana:isIi?stem:'', suffix:e.sf };
 }
 
 function partsNaAdj(w, cid) {
@@ -642,12 +700,12 @@ function getGodanStemKana() {
 function isLit(form) {
   if(!cur) return false;
   if(cur.t==='i-adj') {
-    if(!ruRemoved) return form==='dict';
+    if(!endingRemoved) return form==='dict';
     return true;
   }
   if(cur.t==='na-adj' || cur.t==='noun') return true;
   if(cur.t==='ichidan'||cur.t==='irregular'||cur.t==='drilled') {
-    if((cur.t==='ichidan'||cur.t==='drilled') && !ruRemoved) {
+    if((cur.t==='ichidan'||cur.t==='drilled') && !endingRemoved) {
       return form==='u'||form==='te'||form==='ta';
     }
     return true;
@@ -691,7 +749,7 @@ function drillInto(cid) {
     conjId: cid,
     label: getDrillLabel(cid),
     selVowel: selVowel,
-    ruRemoved: ruRemoved,
+    endingRemoved: endingRemoved,
   });
 
   cur = {
@@ -702,7 +760,7 @@ function drillInto(cid) {
   };
   selVowel = null;
   selConj = null;
-  ruRemoved = true;
+  endingRemoved = true;
   render();
 }
 
@@ -712,7 +770,7 @@ function drillBack(toIndex) {
     cur = base.verb;
     selVowel = null;
     selConj = null;
-    ruRemoved = false;
+    endingRemoved = false;
     drillStack = [];
   } else {
     const entry = drillStack[toIndex];
@@ -720,7 +778,7 @@ function drillBack(toIndex) {
     cur = entry.verb;
     selVowel = null;
     selConj = null;
-    ruRemoved = false;
+    endingRemoved = false;
   }
   render();
 }
@@ -816,33 +874,33 @@ function renderTiles() {
             d.classList.add('ending');
           }
         } else if(cur.t==='i-adj') {
-          if(ruRemoved) {
+          if(endingRemoved) {
             d.classList.add('removed');
             d.classList.remove('filled');
             d.textContent='い';
             d.style.color='#4a5a6a';
             d.style.textDecoration='line-through';
             d.style.cursor='pointer';
-            d.onclick=()=>{ ruRemoved=false; selConj=null; render(); };
+            d.onclick=()=>{ endingRemoved=false; selConj=null; render(); };
           } else {
             d.classList.add('ending');
             d.classList.add('pulse');
-            d.onclick=()=>{ ruRemoved=true; selConj=null; render(); };
+            d.onclick=()=>{ endingRemoved=true; selConj=null; render(); };
           }
         } else if(cur.t==='na-adj' || cur.t==='noun') {
           // No interactive ending - just filled
         } else if(cur.t==='ichidan'||cur.t==='drilled') {
-          if(ruRemoved) {
+          if(endingRemoved) {
             d.classList.add('removed');
             d.classList.remove('filled');
             d.textContent='る';
             d.style.color='#4a5a6a';
             d.style.textDecoration='line-through';
             d.style.cursor='pointer';
-            d.onclick=()=>{ ruRemoved=false; selConj=null; render(); };
+            d.onclick=()=>{ endingRemoved=false; selConj=null; render(); };
           } else {
             d.classList.add('ending','pulse');
-            d.onclick=()=>{ ruRemoved=true; selConj=null; render(); };
+            d.onclick=()=>{ endingRemoved=true; selConj=null; render(); };
           }
         } else {
           // irregular
@@ -861,10 +919,10 @@ function renderHint() {
   const isIchi = cur.t==='ichidan'||cur.t==='drilled';
   const isGodan = cur.t==='godan';
 
-  if(cur.t==='i-adj' && !ruRemoved) {
+  if(cur.t==='i-adj' && !endingRemoved) {
     el.textContent='Click the い tile to remove it and see conjugations';
     return;
-  } else if(cur.t==='i-adj' && ruRemoved && !selConj) {
+  } else if(cur.t==='i-adj' && endingRemoved && !selConj) {
     el.textContent='Click a conjugation to build the word';
     return;
   } else if((cur.t==='na-adj' || cur.t==='noun') && !selConj) {
@@ -876,9 +934,9 @@ function renderHint() {
     el.textContent='Click a kana in the highlighted column to select a form';
   } else if(isGodan && selVowel && !selConj) {
     el.textContent='Click a conjugation on the right';
-  } else if(isIchi && !ruRemoved) {
+  } else if(isIchi && !endingRemoved) {
     el.textContent='Click the る tile to remove it and see conjugations';
-  } else if(isIchi && ruRemoved && !selConj) {
+  } else if(isIchi && endingRemoved && !selConj) {
     el.textContent='Click a conjugation to build the word';
   } else if(selConj) {
     // Check if drillable
@@ -1032,7 +1090,7 @@ function renderChart() {
       }
       // Ichidan/drilled/irregular: highlight る (column 8, row 2)
       else if(cur&&(cur.t==='ichidan'||cur.t==='drilled'||cur.t==='irregular')&&ci===8&&ri===2&&ch==='る') {
-        c.classList.add(ruRemoved?'active-stem':'verb-ending');
+        c.classList.add(endingRemoved?'active-stem':'verb-ending');
       }
       g.appendChild(c);
     });
@@ -1198,7 +1256,8 @@ function renderBar() {
       const d=document.createElement('div');
       d.className='vchip '+v.t+(cur&&cur.k===v.k&&drillStack.length===0?' on':'');
       let inner='';
-      if(v.exc) inner+='<span class="exc-badge" title="Godan exception - looks ichidan!">!</span>';
+      const excTitle = v.t==='i-adj' ? 'Irregular adjective' : 'Godan exception - looks ichidan!';
+      if(v.exc) inner+='<span class="exc-badge" title="'+excTitle+'">!</span>';
       inner+=`<span class="ck">${v.k}</span>`;
       inner+=`<span class="cr">${v.r}</span>`;
       if(v.jlpt) inner+=`<span class="jlpt-badge j${v.jlpt}">N${v.jlpt}</span>`;
@@ -1250,9 +1309,9 @@ function pushState() {
   if(!cur) { history.replaceState(null,'',location.pathname); return; }
   const p = new URLSearchParams();
   p.set('tab', activeTab);
-  p.set('v', cur.r); // use reading as verb identifier
+  p.set('v', cur.k); // use kanji as verb identifier (unique)
   if(selVowel) p.set('f', selVowel);
-  if(ruRemoved) p.set('ru', '0');
+  if(endingRemoved) p.set('ru', '0');
   if(selConj) p.set('c', selConj);
   if(drillStack.length > 0) {
     p.set('d', drillStack.map(e => e.conjId).join(','));
@@ -1266,16 +1325,16 @@ function loadFromURL() {
   const p = new URLSearchParams(hash);
   const tab = p.get('tab');
   if(tab && ['verb','adj','noun'].includes(tab)) activeTab = tab;
-  const reading = p.get('v');
-  if(!reading) return false;
+  const wordKey = p.get('v');
+  if(!wordKey) return false;
 
-  const verb = WORDS.find(v => v.r === reading);
+  const verb = WORDS.find(v => v.k === wordKey);
   if(!verb) return false;
 
   cur = verb;
   selVowel = null;
   selConj = null;
-  ruRemoved = false;
+  endingRemoved = false;
   drillStack = [];
 
   // Replay drill-down stack
@@ -1287,14 +1346,14 @@ function loadFromURL() {
       drillStack.push({
         verb: cur, conjId: cid,
         label: getDrillLabel(cid),
-        selVowel: null, ruRemoved: false,
+        selVowel: null, endingRemoved: false,
       });
       cur = { k: full, r: full, m: getDrillMeaning(drillStack[0].verb, cid), t: 'drilled' };
     }
   }
 
   // Restore state
-  if(p.get('ru') === '0') ruRemoved = true;
+  if(p.get('ru') === '0') endingRemoved = true;
   if(p.get('f')) selVowel = p.get('f');
   if(p.get('c')) selConj = p.get('c');
 
@@ -1307,7 +1366,7 @@ function loadFromURL() {
 
 function switchTab(tab) {
   activeTab = tab;
-  cur = null; selVowel = null; selConj = null; ruRemoved = false; drillStack = [];
+  cur = null; selVowel = null; selConj = null; endingRemoved = false; drillStack = [];
   render();
   document.querySelectorAll('.tab').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === tab);
@@ -1315,17 +1374,24 @@ function switchTab(tab) {
 }
 
 function loadVerb(v) {
-  cur=v; selVowel=null; selConj=null; ruRemoved=false; drillStack=[];
+  cur=v; selVowel=null; selConj=null; endingRemoved=false; drillStack=[];
   render();
 }
 
 function getRandomWord() {
   const pool = getFilteredWords();
-  if(pool.length===0) { loadVerb(WORDS[Math.floor(Math.random()*WORDS.length)]); return; }
+  if(pool.length===0) {
+    // Fallback to any word in the current tab
+    const tabTypes = {verb:['godan','ichidan','irregular'],adj:['i-adj','na-adj'],noun:['noun']};
+    const fallback = WORDS.filter(v => (tabTypes[activeTab]||[]).includes(v.t));
+    if(fallback.length===0) return;
+    loadVerb(fallback[Math.floor(Math.random()*fallback.length)]);
+    return;
+  }
   loadVerb(pool[Math.floor(Math.random()*pool.length)]);
 }
 
-function clearAll() { cur=null; selVowel=null; selConj=null; ruRemoved=false; drillStack=[]; render(); }
+function clearAll() { cur=null; selVowel=null; selConj=null; endingRemoved=false; drillStack=[]; render(); }
 
 // =====================================================================
 // INIT
