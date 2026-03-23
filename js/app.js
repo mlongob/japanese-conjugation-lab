@@ -802,25 +802,26 @@ function drillInto(cid) {
 }
 
 function drillTeCompound(compound) {
-  // Get the base verb (the one we drilled て from)
+  // All compounds (drillable and terminal) first just select to show in tiles
+  selConj = selConj === compound.id ? null : compound.id;
+  render();
+}
+
+// Actually drill into a selected て compound verb (called when clicking the ending tile)
+function drillSelectedTeCompound() {
+  const compound = TE_COMPOUNDS.find(c => c.id === selConj);
+  if (!compound || !compound.drillType) return;
+
   const baseEntry = drillStack[drillStack.length - 1];
   const baseVerb = baseEntry.verb;
   const teForm = getFullConj(baseVerb, 'te');
   if (!teForm) return;
   const full = teForm + compound.suf;
 
-  if (!compound.drillType) {
-    // Terminal phrase -- just show in tiles
-    selConj = selConj === compound.id ? null : compound.id;
-    render();
-    return;
-  }
-
-  // Determine the drilled verb type
   let newType;
   if (compound.drillType === 'ichidan') newType = 'drilled';
   else if (compound.drillType === 'aru') newType = 'irregular';
-  else newType = compound.drillType; // 'godan'
+  else newType = compound.drillType;
 
   drillStack.push({
     verb: cur, conjId: compound.id,
@@ -835,7 +836,6 @@ function drillTeCompound(compound) {
   teCompoundMode = false;
   selVowel = null;
   selConj = null;
-  // Auto-remove ending for ichidan drilled verbs
   endingRemoved = (compound.drillType === 'ichidan');
   render();
 }
@@ -920,7 +920,7 @@ function renderTiles() {
     }
   }
 
-  // Handle て compound terminal phrase display
+  // Handle て compound phrase display (both drillable and terminal)
   if (selConj && teCompoundMode) {
     const compound = TE_COMPOUNDS.find(c => c.id === selConj);
     if (compound) {
@@ -935,13 +935,23 @@ function renderTiles() {
         let cc = allChars.length;
         if (cc > 10) el.classList.add('very-compact');
         else if (cc > 7) el.classList.add('compact');
+        const canDrill = !!compound.drillType;
         for (let i = 0; i < total; i++) {
           const d = document.createElement('div');
           d.className = 'tile-slot';
           if (i < allChars.length) {
             d.textContent = allChars[i];
-            if (i < teChars.length) d.classList.add('stem-new');
-            else d.classList.add('conj-part');
+            if (i < teChars.length) {
+              d.classList.add('stem-new');
+            } else if (canDrill && i === allChars.length - 1) {
+              // Last char of a drillable compound: gold pulsing tile
+              d.classList.add('ending');
+              d.classList.add('pulse');
+              d.title = 'Click to conjugate this compound verb';
+              d.onclick = () => drillSelectedTeCompound();
+            } else {
+              d.classList.add('conj-part');
+            }
           }
           el.appendChild(d);
         }
@@ -1054,7 +1064,16 @@ function renderHint() {
   if(!cur) { el.textContent=''; return; }
 
   if (teCompoundMode) {
-    el.textContent = 'Select a て compound to drill deeper, or a phrase to see the full form';
+    if (selConj) {
+      const compound = TE_COMPOUNDS.find(c => c.id === selConj);
+      if (compound && compound.drillType) {
+        el.textContent = 'Click the pulsing tile to conjugate this compound verb';
+      } else {
+        el.textContent = '';
+      }
+    } else {
+      el.textContent = 'Select a て compound to see the full form';
+    }
     return;
   }
 
