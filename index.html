@@ -84,11 +84,11 @@
   .verb-type-badge.ichidan { background:#d03030; color:#fff; }
   .verb-type-badge.irregular { background:#7044aa; color:#fff; }
 
-  /* CONTENT - rebalanced 40/60 split */
-  .content-row { display:grid; grid-template-columns:2fr 3fr; gap:12px; }
+  /* CONTENT - auto/1fr split */
+  .content-row { display:grid; grid-template-columns:auto 1fr; gap:12px; }
 
   /* HIRAGANA */
-  .hiragana-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; }
+  .hiragana-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; width:380px; min-width:380px; }
   .chart-grid { display:grid; grid-template-columns:44px repeat(9,1fr); gap:2px; }
   .row-label {
     display:flex; align-items:center; justify-content:center;
@@ -137,13 +137,14 @@
 
   /* CONJUGATION TABLE */
   .conj-panel { background:linear-gradient(135deg,#1c2840,#1a2538); border-radius:10px; padding:10px; border:1px solid #2a3a50; flex:1; overflow-y:auto; }
-  .conj-section-title { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#556677; padding:4px 4px 2px; margin-top:6px; }
-  .conj-section-title:first-child { margin-top:0; }
-  .conj-row { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; margin-bottom:3px; }
-  .conj-row.c5 { grid-template-columns:repeat(5,1fr); }
-  .conj-row.c3 { grid-template-columns:repeat(3,1fr); }
-  .conj-row.c2 { grid-template-columns:repeat(2,1fr); }
-  .conj-row.c1 { grid-template-columns:1fr; }
+  .conj-section { margin-bottom:4px; }
+  .conj-section.hidden { display:none; }
+  .conj-section-title { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#556677; padding:3px 4px 2px; }
+  .conj-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; }
+  .conj-grid.cols-5 { grid-template-columns:repeat(5,1fr); }
+  .conj-grid.cols-3 { grid-template-columns:repeat(3,1fr); }
+  .conj-grid.cols-2 { grid-template-columns:repeat(2,1fr); }
+  .conj-grid.cols-1 { grid-template-columns:1fr; }
   .cc {
     padding:6px 4px; border-radius:5px;
     font-family:'M PLUS Rounded 1c',sans-serif; font-size:13px; font-weight:700;
@@ -228,8 +229,8 @@
   .verb-group-label.irregular-label { color:#a060d0; }
   .verb-group-chips { display:flex; flex-wrap:wrap; gap:4px; }
   .vchip {
-    display:flex; flex-direction:column; align-items:center; position:relative;
-    padding:4px 8px; min-width:56px;
+    display:flex; flex-direction:column; align-items:center;
+    padding:6px 10px; min-width:70px;
     border:2px solid #2a3a50; border-radius:7px; cursor:pointer; transition:all 0.12s;
   }
   .vchip:hover { filter:brightness(1.25); transform:translateY(-1px); }
@@ -237,13 +238,13 @@
   .vchip.godan { background:linear-gradient(180deg,#1a3828,#1c2e22); border-color:#2a6040; }
   .vchip.ichidan { background:linear-gradient(180deg,#381a1a,#2e1c1c); border-color:#6a2a2a; }
   .vchip.irregular { background:linear-gradient(180deg,#2a1a38,#221c2e); border-color:#4a2a6a; }
-  .vchip .ck { font-family:'M PLUS Rounded 1c',sans-serif; font-size:15px; font-weight:800; color:#c0c8d0; }
-  .vchip .cr { font-family:'M PLUS Rounded 1c',sans-serif; font-size:9px; color:#667788; }
+  .vchip .ck { font-family:'M PLUS Rounded 1c',sans-serif; font-size:17px; font-weight:800; color:#c0c8d0; }
+  .vchip .cr { font-family:'M PLUS Rounded 1c',sans-serif; font-size:10px; color:#667788; }
 
   /* JLPT badge on chip */
   .vchip .jlpt-badge {
-    position:absolute; top:1px; left:1px; font-size:7px; font-weight:900;
-    padding:0px 3px; border-radius:3px; color:#fff; line-height:1.4;
+    font-size:8px; font-weight:800;
+    padding:1px 5px; border-radius:3px; color:#fff; margin-top:2px;
   }
   .jlpt-badge.j5 { background:#2a9d5c; }
   .jlpt-badge.j4 { background:#2878cc; }
@@ -253,7 +254,7 @@
 
   /* Exception badge */
   .vchip .exc-badge {
-    position:absolute; top:1px; right:1px; font-size:9px; font-weight:900;
+    display:inline; font-size:9px; font-weight:900;
     color:#e08820; cursor:help; line-height:1;
   }
 </style>
@@ -378,6 +379,11 @@ const VERBS=[
   {k:'\u7D42\u308F\u308B',r:'\u304A\u308F\u308B',m:'to end',t:'godan',jlpt:4},
   {k:'\u59CB\u307E\u308B',r:'\u306F\u3058\u307E\u308B',m:'to begin (intrans.)',t:'godan',jlpt:4},
   {k:'\u5909\u308F\u308B',r:'\u304B\u308F\u308B',m:'to change (intrans.)',t:'godan',jlpt:4},
+  {k:'\u805E\u304F',r:'\u304D\u304F',m:'to listen, to ask',t:'godan',jlpt:5},
+  {k:'\u4F7F\u3046',r:'\u3064\u304B\u3046',m:'to use',t:'godan',jlpt:5},
+  {k:'\u4F4F\u3080',r:'\u3059\u3080',m:'to live, to reside',t:'godan',jlpt:4},
+  {k:'\u7740\u304F',r:'\u3064\u304F',m:'to arrive',t:'godan',jlpt:4},
+  {k:'\u98DB\u3076',r:'\u3068\u3076',m:'to fly, to jump',t:'godan',jlpt:4},
 
   // === GODAN EXCEPTIONS (iru/eru ending but godan) ===
   {k:'\u8981\u308B',r:'\u3044\u308B',m:'to need',t:'godan',jlpt:3,exc:true},
@@ -421,6 +427,12 @@ const VERBS=[
   {k:'\u8CA0\u3051\u308B',r:'\u307E\u3051\u308B',m:'to lose (game)',t:'ichidan',jlpt:3},
   {k:'\u4FE1\u3058\u308B',r:'\u3057\u3093\u3058\u308B',m:'to believe',t:'ichidan',jlpt:3},
   {k:'\u611F\u3058\u308B',r:'\u304B\u3093\u3058\u308B',m:'to feel',t:'ichidan',jlpt:3},
+  {k:'\u4E0A\u3052\u308B',r:'\u3042\u3052\u308B',m:'to give, to raise',t:'ichidan',jlpt:4},
+  {k:'\u51FA\u304B\u3051\u308B',r:'\u3067\u304B\u3051\u308B',m:'to go out',t:'ichidan',jlpt:4},
+  {k:'\u751F\u307E\u308C\u308B',r:'\u3046\u307E\u308C\u308B',m:'to be born',t:'ichidan',jlpt:4},
+  {k:'\u75B2\u308C\u308B',r:'\u3064\u304B\u308C\u308B',m:'to get tired',t:'ichidan',jlpt:4},
+  {k:'\u843D\u3061\u308B',r:'\u304A\u3061\u308B',m:'to fall',t:'ichidan',jlpt:3},
+  {k:'\u6C7A\u3081\u308B',r:'\u304D\u3081\u308B',m:'to decide',t:'ichidan',jlpt:3},
 
   // === IRREGULAR ===
   {k:'\u3059\u308B',r:'\u3059\u308B',m:'to do',t:'irregular',jlpt:5},
@@ -1038,42 +1050,44 @@ function renderConj() {
   const sections=CONJS(isDrilled);
 
   sections.forEach(sec=>{
+    // Check if any item in this section is lit
+    const anyLit = sec.items.some(it => isLit(it.form));
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'conj-section' + (anyLit ? '' : ' hidden');
+
     const h=document.createElement('div');
     h.className='conj-section-title';
     h.textContent=sec.sec;
-    p.appendChild(h);
+    wrapper.appendChild(h);
 
-    for(let i=0;i<sec.items.length;i+=4){
-      const chunk=sec.items.slice(i,i+4);
-      const row=document.createElement('div');
-      row.className='conj-row';
-      if(chunk.length===5) row.classList.add('c5');
-      if(chunk.length===3) row.classList.add('c3');
-      if(chunk.length===2) row.classList.add('c2');
-      if(chunk.length===1) row.classList.add('c1');
+    // Use grid with appropriate column count
+    const grid = document.createElement('div');
+    const n = sec.items.length;
+    grid.className = 'conj-grid' + (n<=1?' cols-1':n<=2?' cols-2':n<=3?' cols-3':n===5?' cols-5':'');
 
-      chunk.forEach(it=>{
-        const c=document.createElement('div');
-        const lit=isLit(it.form);
-        c.className='cc '+(lit?it.cl+' lit':'off');
-        if(selConj===it.id) c.classList.add('selected');
+    sec.items.forEach(it=>{
+      const c=document.createElement('div');
+      const lit=isLit(it.form);
+      c.className='cc '+(lit?it.cl+' lit':'off');
+      if(selConj===it.id) c.classList.add('selected');
 
-        if(lit&&cur) {
-          const suf=getDisplaySuffix(cur,it.id);
-          let label = it.lb;
-          if(it.drillable) label += ' [click \u308B to drill]';
-          c.innerHTML=(suf||'\u2014')+`<span class="lb">${label}</span>`;
-          c.onclick=()=>{
-            selConj=selConj===it.id?null:it.id;
-            render();
-          };
-        } else {
-          c.innerHTML=`<span class="lb">${it.lb}</span>`;
-        }
-        row.appendChild(c);
-      });
-      p.appendChild(row);
-    }
+      if(lit&&cur) {
+        const suf=getDisplaySuffix(cur,it.id);
+        let label = it.lb;
+        if(it.drillable) label += ' [click \u308B to drill]';
+        c.innerHTML=(suf||'\u2014')+`<span class="lb">${label}</span>`;
+        c.onclick=()=>{
+          selConj=selConj===it.id?null:it.id;
+          render();
+        };
+      } else {
+        c.innerHTML=`<span class="lb">${it.lb}</span>`;
+      }
+      grid.appendChild(c);
+    });
+    wrapper.appendChild(grid);
+    p.appendChild(wrapper);
   });
 }
 
@@ -1119,16 +1133,11 @@ function renderBar() {
     verbs.forEach(v=>{
       const d=document.createElement('div');
       d.className='vchip '+v.t+(cur&&cur.k===v.k&&drillStack.length===0?' on':'');
-      let inner=`<span class="ck">${v.k}</span><span class="cr">${v.r}</span>`;
-      // JLPT badge
-      if(v.jlpt) {
-        const jcls='j'+v.jlpt;
-        inner=`<span class="jlpt-badge ${jcls}">N${v.jlpt}</span>`+inner;
-      }
-      // Exception badge
-      if(v.exc) {
-        inner+=`<span class="exc-badge" title="Godan exception (looks ichidan!)">!</span>`;
-      }
+      let inner='';
+      if(v.exc) inner+='<span class="exc-badge" title="Godan exception - looks ichidan!">!</span>';
+      inner+=`<span class="ck">${v.k}</span>`;
+      inner+=`<span class="cr">${v.r}</span>`;
+      if(v.jlpt) inner+=`<span class="jlpt-badge j${v.jlpt}">N${v.jlpt}</span>`;
       d.innerHTML=inner;
       d.onclick=()=>loadVerb(v);
       chips.appendChild(d);
