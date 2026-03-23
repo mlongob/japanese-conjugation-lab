@@ -84,10 +84,10 @@
   .verb-type-badge.ichidan { background:#d03030; color:#fff; }
   .verb-type-badge.irregular { background:#7044aa; color:#fff; }
 
-  /* CONTROLS - inline with verb info */
-  .verb-actions { display:flex; gap:5px; margin-top:6px; }
+  /* CONTROLS - right side of tile row */
+  .top-row-actions { display:flex; flex-direction:column; gap:4px; margin-left:auto; }
   .btn-sm {
-    padding:4px 12px; border:none; border-radius:5px;
+    padding:5px 14px; border:none; border-radius:5px;
     font-family:'Nunito',sans-serif; font-weight:700; font-size:10px;
     cursor:pointer; transition:all 0.12s; text-transform:uppercase; letter-spacing:0.5px;
   }
@@ -280,10 +280,10 @@
       <div class="meaning-line" id="vmeaning"></div>
       <div id="vtype"></div>
       <div class="english-line" id="venglish"></div>
-      <div class="verb-actions">
-        <button class="btn-sm shuffle" onclick="getRandomVerb()">Surprise me</button>
-        <button class="btn-sm clear" onclick="clearAll()">Clear</button>
-      </div>
+    </div>
+    <div class="top-row-actions">
+      <button class="btn-sm shuffle" onclick="getRandomVerb()">Surprise me</button>
+      <button class="btn-sm clear" onclick="clearAll()">Clear</button>
     </div>
   </div>
   <div class="content-row">
